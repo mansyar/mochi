@@ -31,17 +31,17 @@
     - [x] Test that animation/render constants are positive integers
 - [x] Run tests and confirm they fail (no implementation yet) — **Red Phase**
 
-### Task 0.4: Implement config.py
-- [ ] Create `src/mochi/config.py` with all physics constants (GRAVITY, TERMINAL_VELOCITY, WALK_SPEED, CLIMB_SPEED, WALL_SLIDE_SPEED)
-- [ ] Add all FSM timer constants (IDLE_TO_WALK_TIMER, IDLE_TO_SLEEP_TIMER, WALK_TO_IDLE_TIMER, CLIMB_TO_WALLSLIDE_TIMER, CLIMB_TIMEOUT, WALLSLIDE_TO_CLIMB_TIMER, SLEEP_DURATION_TIMER)
-- [ ] Add all metric constants (HUNGER_DECAY_PER_HOUR, BOREDOM_DECAY_PER_HOUR, AFFECTION_DECAY_PER_HOUR, LOW_HUNGER_SPEED_PENALTY, BOREDOM_LOW_THRESHOLD, AFFECTION_AVOIDANCE_THRESHOLD, HAPPY_ZOOMIE_CHANCE, MAX_OFFLINE_DECAY_HOURS, STATE_WRITE_DEBOUNCE_S, ITEM_APPROACH_TIMEOUT_S)
-- [ ] Add rendering constants (ANIMATION_TICK_MS, SPRITE_CELL_WIDTH, SPRITE_CELL_HEIGHT, SPRITE_SCALE)
-- [ ] Add polling constant (WINDOW_POLL_INTERVAL_MS)
-- [ ] Add item constants (FOOD_COOLDOWN_S, YARN_COOLDOWN_S, PET_COOLDOWN_S, BOX_COOLDOWN_S, BOX_DURATION_S)
-- [ ] Add onboarding constant (ONBOARDING_DURATION_S)
-- [ ] Run tests and confirm they pass — **Green Phase**
-- [ ] Run `uv run ruff check src/` — zero lint errors
-- [ ] Run `uv run mypy src/mochi/` — zero type errors
+### Task 0.4: Implement config.py `3a2373d`
+- [x] Create `src/mochi/config.py` with all physics constants (GRAVITY, TERMINAL_VELOCITY, WALK_SPEED, CLIMB_SPEED, WALL_SLIDE_SPEED)
+- [x] Add all FSM timer constants (IDLE_TO_WALK_TIMER, IDLE_TO_SLEEP_TIMER, WALK_TO_IDLE_TIMER, CLIMB_TO_WALLSLIDE_TIMER, CLIMB_TIMEOUT, WALLSLIDE_TO_CLIMB_TIMER, SLEEP_DURATION_TIMER)
+- [x] Add all metric constants (HUNGER_DECAY_PER_HOUR, BOREDOM_DECAY_PER_HOUR, AFFECTION_DECAY_PER_HOUR, LOW_HUNGER_SPEED_PENALTY, BOREDOM_LOW_THRESHOLD, AFFECTION_AVOIDANCE_THRESHOLD, HAPPY_ZOOMIE_CHANCE, MAX_OFFLINE_DECAY_HOURS, STATE_WRITE_DEBOUNCE_S, ITEM_APPROACH_TIMEOUT_S)
+- [x] Add rendering constants (ANIMATION_TICK_MS, SPRITE_CELL_WIDTH, SPRITE_CELL_HEIGHT, SPRITE_SCALE)
+- [x] Add polling constant (WINDOW_POLL_INTERVAL_MS)
+- [x] Add item constants (FOOD_COOLDOWN_S, YARN_COOLDOWN_S, PET_COOLDOWN_S, BOX_COOLDOWN_S, BOX_DURATION_S)
+- [x] Add onboarding constant (ONBOARDING_DURATION_S)
+- [x] Run tests and confirm they pass — **Green Phase**
+- [x] Run `uv run ruff check src/` — zero lint errors
+- [x] Run `uv run mypy src/mochi/` — zero type errors (pending main.py)
 
 ### Task 0.5: Write tests for logger.py
 - [ ] Write `tests/test_logger.py`:
