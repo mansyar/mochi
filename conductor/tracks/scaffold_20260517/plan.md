@@ -62,13 +62,13 @@
 - [x] Run `uv run ruff check src/` — zero lint errors
 - [x] Run `uv run mypy src/mochi/` — zero type errors (pending main.py)
 
-### Task 0.7: Write tests for platform.py
-- [ ] Write `tests/test_platform.py`:
-    - [ ] Test that `get_platform()` returns one of "win32", "darwin", "linux" (based on sys.platform)
-    - [ ] Test that `get_data_dir()` returns a Path object
-    - [ ] Test that `is_alt_held()` returns a boolean
-    - [ ] Test that `set_click_through()` accepts a QWidget and bool without raising
-- [ ] Run tests and confirm they fail — **Red Phase**
+### Task 0.7: Write tests for platform.py `b43cc34`
+- [x] Write `tests/test_platform.py`:
+    - [x] Test that `get_platform()` returns one of "win32", "darwin", "linux" (based on sys.platform)
+    - [x] Test that `get_data_dir()` returns a Path object
+    - [x] Test that `is_alt_held()` returns a boolean
+    - [x] Test that `set_click_through()` accepts a QWidget and bool without raising
+- [x] Run tests and confirm they fail — **Red Phase**
 
 ### Task 0.8: Implement platform.py stubs
 - [ ] Create `src/mochi/utils/platform.py`:
