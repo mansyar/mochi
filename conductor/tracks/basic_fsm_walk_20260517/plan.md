@@ -49,37 +49,37 @@
 
 > **Goal:** Wire FSM + Physics into the Canvas animation loop, implement direction-aware sprite rendering with edge pause behavior.
 
-- [ ] Task 3.1: Update Canvas to load walk sprites
-    - [ ] Load `walk` animation key from SpriteSheet in Canvas.__init__
-    - [ ] Store `_walk_frames: list[QPixmap]` alongside existing `_idle_frames`
-- [ ] Task 3.2: Wire FSM + Physics into animation tick
-    - [ ] Create FSM and Physics instances in Canvas.__init__
-    - [ ] Store `_last_tick: float = time.monotonic()` for dt calculation
-    - [ ] In `_advance_frame()`: `now = time.monotonic(); dt = now - self._last_tick; self._last_tick = now`
-    - [ ] Call `fsm.tick(dt)` then `edge_hit = physics.update(dt, fsm.current_state, screen_width, sprite_width)`
-    - [ ] If edge_hit: call `fsm.transition_to(EdgePause)`, queue direction reversal on EdgePause expiry
-    - [ ] Store `_current_sprite_key: str` to track active animation
-    - [ ] On state change, reload frames from cache if animation key changed
-    - [ ] Call `self.update()` for repaint
-- [ ] Task 3.3: Implement direction-aware sprite rendering
-    - [ ] In `paintEvent`, check physics.direction
-    - [ ] When direction == -1 (left): use `QPainter.scale(-1, 1)` before drawPixmap
-    - [ ] When direction == +1 (right): draw normally
-- [ ] Task 3.4: Implement screen edge pause behavior via EdgePause state
-    - [ ] When physics signals edge-hit, call `fsm.transition_to(EdgePause)` (0.5-1s timer)
-    - [ ] When EdgePause timer fires: reverse direction, transition to Walk
-    - [ ] EdgePause uses walk sprite frames (cat pauses mid-step — visually seamless)
-- [ ] Task 3.5: Implement adaptive tick rate per FSM state
-    - [ ] On FSM state transition, update `_animation_timer.setInterval()`:
+- [x] Task 3.1: Update Canvas to load walk sprites `3482d5c`
+    - [x] Load `walk` animation key from SpriteSheet in Canvas.__init__
+    - [x] Store walk frames in `_animations["walk"]` alongside `_animations["idle"]`
+- [x] Task 3.2: Wire FSM + Physics into animation tick
+    - [x] Create FSM and Physics instances in Canvas.__init__
+    - [x] Store `_last_tick: float = time.monotonic()` for dt calculation
+    - [x] In `_advance_frame()`: `now = time.monotonic(); dt = now - self._last_tick; self._last_tick = now`
+    - [x] Call `fsm.tick(dt)` then `edge_hit = physics.update(...)`
+    - [x] If edge_hit: call `fsm.transition_to(EdgePause)`, direction reversal on EdgePause expiry
+    - [x] Store `_current_sprite_key: str` to track active animation
+    - [x] On state change, reload frames from cache if animation key changed
+    - [x] Call `self.update()` for repaint
+- [x] Task 3.3: Implement direction-aware sprite rendering
+    - [x] In `paintEvent`, check physics.direction
+    - [x] When direction == -1 (left): use `QPainter.scale(-1, 1)` before drawPixmap
+    - [x] When direction == +1 (right): draw normally
+- [x] Task 3.4: Implement screen edge pause behavior via EdgePause state
+    - [x] When physics signals edge-hit, call `fsm.transition_to(EdgePause)` (0.5-1s timer)
+    - [x] When EdgePause timer fires: reverse direction, transition to Walk
+    - [x] EdgePause uses walk sprite frames (cat pauses mid-step — visually seamless)
+- [x] Task 3.5: Implement adaptive tick rate per FSM state
+    - [x] On FSM state transition, update `_animation_timer.setInterval()`:
         - Walk state → 100ms (10 FPS, smooth movement)
         - Idle state → 250ms (4 FPS, lower CPU)
         - EdgePause state → 250ms (same as idle, minimal CPU)
-    - [ ] Write test: Canvas timer interval changes on FSM state transition
-- [ ] Task 3.6: Update `src/mochi/core/__init__.py`
-    - [ ] Re-export FSM and Physics for clean imports
-- [ ] Task 3.7: Run full test suite and quality gates
-    - [ ] Run `uv run pytest` — all 79 existing tests + new tests pass
-    - [ ] Run `uv run ruff check src/` — zero lint errors
-    - [ ] Run `uv run mypy src/mochi/` — zero type errors
-    - [ ] Run `uv run ruff format --check src/` — zero formatting violations
+    - [x] Write test: Canvas timer interval changes on FSM state transition
+- [x] Task 3.6: Update `src/mochi/core/__init__.py`
+    - [x] Re-export FSM and Physics for clean imports
+- [x] Task 3.7: Run full test suite and quality gates
+    - [x] Run `uv run pytest` — all 116 tests pass
+    - [x] Run `uv run ruff check src/` — zero lint errors
+    - [x] Run `uv run mypy src/mochi/` — zero type errors
+    - [x] Run `uv run ruff format --check src/` — zero formatting violations
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Canvas Integration & Walk Animation' (Protocol in workflow.md)
