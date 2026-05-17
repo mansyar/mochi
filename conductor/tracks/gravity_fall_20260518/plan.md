@@ -4,18 +4,18 @@
 
 **Goal:** Add the `Fall` behavior state to the FSM with correct transitions and defensive timer handling.
 
-- [ ] Task: Write FSM tests for Fall state
-    - [ ] `test_fsm.py`: `PetState.Fall` exists and is not None
-    - [ ] `test_fsm.py`: Walk→Fall transition on explicit `transition_to(PetState.Fall)`
-    - [ ] `test_fsm.py`: Fall→Idle transition on explicit `transition_to(PetState.Idle)`
-    - [ ] `test_fsm.py`: Fall state is immune to timer-based auto-transition — tick with dt=100s and assert state is still Fall
-    - [ ] `test_fsm.py`: `_on_timer_expired()` does not raise when state is Fall (defensive no-op)
+- [x] Task: Write FSM tests for Fall state [a5558b5]
+    - [x] `test_fsm.py`: `PetState.Fall` exists and is not None
+    - [x] `test_fsm.py`: Walk→Fall transition on explicit `transition_to(PetState.Fall)`
+    - [x] `test_fsm.py`: Fall→Idle transition on explicit `transition_to(PetState.Idle)`
+    - [x] `test_fsm.py`: Fall state is immune to timer-based auto-transition — tick with dt=100s and assert state is still Fall
+    - [x] `test_fsm.py`: `_on_timer_expired()` does not raise when state is Fall (defensive no-op)
 
-- [ ] Task: Add PetState.Fall to FSM
-    - [ ] `fsm.py`: Add `Fall` property to `PetState` class and create singleton
-    - [ ] `fsm.py`: Add `PetState.Fall` to `_STATE_NAMES` dict
-    - [ ] `fsm.py`: In `_set_timer_for_state`, set Fall's timer to `float('inf')` (physics-driven, never auto-transitions)
-    - [ ] `fsm.py`: Add defensive Fall case to `_on_timer_expired()` — log a warning, no state change
+- [x] Task: Add PetState.Fall to FSM [a5558b5]
+    - [x] `fsm.py`: Add `Fall` property to `PetState` class and create singleton
+    - [x] `fsm.py`: Add `PetState.Fall` to `_STATE_NAMES` dict
+    - [x] `fsm.py`: In `_set_timer_for_state`, set Fall's timer to `float('inf')` (physics-driven, never auto-transitions)
+    - [x] `fsm.py`: Add defensive Fall case to `_on_timer_expired()` — log a warning, no state change
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
