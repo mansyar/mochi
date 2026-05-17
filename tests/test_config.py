@@ -117,3 +117,13 @@ class TestAnimationRenderConstants:
 
     def test_sprite_scale(self) -> None:
         assert config.SPRITE_SCALE > 0
+
+
+class TestScreenCanvasConstants:
+    """All screen/canvas constants must be valid."""
+
+    def test_screen_bottom_margin_px_exists_and_positive_int(self) -> None:
+        assert hasattr(config, "SCREEN_BOTTOM_MARGIN_PX")
+        val = config.SCREEN_BOTTOM_MARGIN_PX
+        assert isinstance(val, int)
+        assert val > 0
