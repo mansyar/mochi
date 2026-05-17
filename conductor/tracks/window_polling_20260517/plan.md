@@ -36,15 +36,15 @@
 
 ## Phase 4: Canvas Integration
 
-- [ ] Task: Wire `platforms_updated` signal into Canvas
-    - [ ] Write tests: Canvas creates `EnvironmentPoller`, signal updates `_surfaces` cache; mocked poller verifies cross-thread signal delivery
-    - [ ] Modify `Canvas.__init__()` to instantiate `EnvironmentPoller(screen_geo=self._screen_geo)` and start it
-    - [ ] Connect `poller.platforms_updated.connect(self._on_platforms_updated)`
-    - [ ] Implement `_on_platforms_updated(surfaces: list[Surface])` — stores list, logs summary at INFO level (e.g., "Surfaces updated: 12 windows, 39 surfaces")
-    - [ ] Implement poller teardown: override `Canvas.closeEvent()` or connect to `QApplication.aboutToQuit` to call `self._poller.quit()`, `self._poller.wait(1000)`, `self._poller.deleteLater()` in sequence
+- [x] Task: Wire `platforms_updated` signal into Canvas [656e015]
+    - [x] Write tests: Canvas creates `EnvironmentPoller`, signal updates `_surfaces` cache; mocked poller verifies cross-thread signal delivery
+    - [x] Modify `Canvas.__init__()` to instantiate `EnvironmentPoller(screen_geo=self._screen_geo)` (started lazily in `showEvent()` for test compatibility)
+    - [x] Connect `poller.platforms_updated.connect(self._on_platforms_updated)`
+    - [x] Implement `_on_platforms_updated(surfaces: list[Surface])` — stores list, logs summary at INFO level
+    - [x] Implement poller teardown: `closeEvent()` → `_stop_poller()` → `quit()`, `wait(2000)`, `deleteLater()`
 
 ## Phase 5: Verification & Cleanup
 
-- [ ] Task: Run full test suite — `uv run pytest` — all existing + new tests pass
-- [ ] Task: Run lint/type checks — `uv run ruff check src/` and `uv run mypy src/mochi/` — zero errors
-- [ ] Task: Commit all changes with descriptive messages
+- [x] Task: Run full test suite — `uv run pytest` — all 153 pass, 1 skip [0a81910]
+- [x] Task: Run lint/type checks — `uv run ruff check src/` and `uv run mypy src/mochi/` — zero errors
+- [x] Task: Commit all changes with descriptive messages
