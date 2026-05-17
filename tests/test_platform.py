@@ -70,7 +70,44 @@ class TestIsAltHeld:
 class TestSetClickThrough:
     """Test click-through toggle stub."""
 
-    def test_accepts_widget_and_bool(self) -> None:
-        # Should not raise when called with None (no widget yet)
+    def test_none_widget_does_not_raise(self) -> None:
+        """set_click_through(None, True) should not raise."""
         set_click_through(None, True)
+
+    def test_none_widget_false_does_not_raise(self) -> None:
+        """set_click_through(None, False) should not raise."""
         set_click_through(None, False)
+
+    def test_windows_enable_click_through(self) -> None:
+        """On Windows, set_click_through(..., True) should call win32 helper."""
+        with (
+            patch("mochi.utils.platform.sys.platform", "win32"),
+            patch("mochi.utils.platform._set_click_through_win32") as mock_set_ct,
+        ):
+            mock_widget = MagicMock()
+            set_click_through(mock_widget, True)
+            mock_set_ct.assert_called_once_with(mock_widget, True)
+
+    def test_windows_disable_click_through(self) -> None:
+        """On Windows, set_click_through(..., False) should call win32 helper."""
+        with (
+            patch("mochi.utils.platform.sys.platform", "win32"),
+            patch("mochi.utils.platform._set_click_through_win32") as mock_set_ct,
+        ):
+            mock_widget = MagicMock()
+            set_click_through(mock_widget, False)
+            mock_set_ct.assert_called_once_with(mock_widget, False)
+
+    def test_macos_does_not_crash(self) -> None:
+        """On macOS, set_click_through should be a no-op (no crash)."""
+        with patch("mochi.utils.platform.sys.platform", "darwin"):
+            mock_widget = MagicMock()
+            set_click_through(mock_widget, True)
+            set_click_through(mock_widget, False)
+
+    def test_linux_does_not_crash(self) -> None:
+        """On Linux, set_click_through should be a no-op (no crash)."""
+        with patch("mochi.utils.platform.sys.platform", "linux"):
+            mock_widget = MagicMock()
+            set_click_through(mock_widget, True)
+            set_click_through(mock_widget, False)
