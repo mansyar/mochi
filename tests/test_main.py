@@ -25,7 +25,7 @@ class TestMain:
         """Application name should be 'Mochi'."""
         app = main.create_application()
         assert app is not None
-        main.QApplication.setApplicationName.assert_called_once_with("Mochi")
+        app.setApplicationName.assert_called_once_with("Mochi")
 
     @patch("mochi.main.QApplication")
     @patch("mochi.main.setup_logging")
