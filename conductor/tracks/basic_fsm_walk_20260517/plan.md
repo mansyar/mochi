@@ -43,7 +43,7 @@
     - [x] **Return bool**: `True` if edge was hit (canvas handles pause/direction reversal), `False` otherwise. Physics does NOT reverse direction — that's the FSM's job.
     - [x] API includes `surfaces=None` parameter for forward-compatibility with Phase 2 window awareness
     - [x] Run tests: confirm all pass (Green phase)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Physics Engine' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Core Physics Engine' (Protocol in workflow.md)
 
 ## Phase 3: Canvas Integration & Walk Animation
 
