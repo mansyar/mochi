@@ -21,10 +21,10 @@
     - [x] Write tests: given mock windows with known rects, produces correct `Surface` objects for all 6 types (`window_top`, `window_left`, `window_right`, `screen_bottom`, `screen_left`, `screen_right`)
     - [x] Write tests: `screen_bottom` Y coordinate matches `SCREEN_BOTTOM_MARGIN_PX + SPRITE_CELL_HEIGHT` formula (consistent with `Canvas._screen_bottom_y()`)
     - [x] Implement `_build_surfaces(windows) -> list[Surface]` — window tops, window left/right, screen edges from cached `screen_geo`
-- [ ] Task: Implement polling loop with QTimer
-    - [ ] Write tests: verify `platforms_updated` signal emission on tick (use mocked `pywinctl` + `QTest.qWait`)
-    - [ ] Implement `run()`: create `QTimer`, connect `timeout` → `_poll`, call `self.exec()` to start event loop
-    - [ ] Implement `_poll()`: orchestrate `_get_visible_windows()` → `_build_surfaces()` → emit signal
+- [x] Task: Implement polling loop with QTimer [3734ffd]
+    - [x] Write tests: verify `platforms_updated` signal emission on tick (use mocked `pywinctl` + `QTest.qWait`)
+    - [x] Implement `run()`: create `QTimer`, connect `timeout` → `_poll`, call `self.exec()` to start event loop
+    - [x] Implement `_poll()`: orchestrate `_get_visible_windows()` → `_build_surfaces()` → emit signal
 
 ## Phase 3: Error Handling & Edge Cases
 
