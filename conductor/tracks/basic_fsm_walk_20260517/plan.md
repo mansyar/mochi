@@ -20,7 +20,7 @@
     - [x] Add same-state transition guard (no-op on duplicate)
     - [x] Add DEBUG-level logging for state transitions
     - [x] Run tests: confirm all pass (Green phase)
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Core FSM Engine' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 1: Core FSM Engine' (Protocol in workflow.md)
 
 ## Phase 2: Core Physics Engine
 
