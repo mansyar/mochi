@@ -4,7 +4,7 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Phase 1, Track 1.1 Complete — Active Development
+**Status:** Phase 1, Track 1.2 Complete — Active Development
 
 ---
 
@@ -115,7 +115,8 @@ omit = ["src/mochi/__main__.py"]
 mochi/
 ├── docs/
 │   ├── PRD.md
-│   └── TDD.md
+│   ├── TDD.md
+│   └── ROADMAP.md
 ├── src/
 │   └── mochi/
 │       ├── __init__.py
@@ -123,31 +124,39 @@ mochi/
 │       ├── config.py              # All tunable constants & defaults
 │       ├── models/
 │       │   ├── __init__.py
-│       │   ├── pet_state.py       # Tamagotchi metrics, JSON serialization
-│       │   └── fsm.py            # Finite State Machine engine
+│       │   ├── pet_state.py       # (planned) Tamagotchi metrics, JSON serialization
+│       │   └── fsm.py            # (planned) Finite State Machine engine
 │       ├── core/
 │       │   ├── __init__.py
-│       │   ├── canvas.py          # Main transparent overlay window
-│       │   ├── physics.py         # Gravity, collision detection, movement
-│       │   ├── environment.py     # PyWinCtl polling, window geometry cache
-│       │   └── input_bridge.py    # Platform-native global hotkey → Qt signal bridge
+│       │   ├── canvas.py          # Main transparent overlay window + sprite rendering
+│       │   ├── physics.py         # (planned) Gravity, collision detection, movement
+│       │   ├── environment.py     # (planned) PyWinCtl polling, window geometry cache
+│       │   └── input_bridge.py    # (planned) Platform-native global hotkey bridge
 │       ├── ui/
 │       │   ├── __init__.py
-│       │   ├── toolbox.py         # Floating inventory menu widget
-│       │   ├── tray_icon.py       # System tray icon & context menu
-│       │   ├── onboarding.py      # First-run tooltip overlay
-│       │   └── sprites.py         # Sprite sheet loader & animation cache
+│       │   ├── sprites.py         # Sprite sheet loader & animation cache ✅
+│       │   ├── toolbox.py         # (planned) Floating inventory menu widget
+│       │   ├── tray_icon.py       # (planned) System tray icon & context menu
+│       │   └── onboarding.py      # (planned) First-run tooltip overlay
 │       └── utils/
 │           ├── __init__.py
 │           ├── logger.py          # Structured logging setup
 │           └── platform.py        # OS detection & platform-specific shims
 ├── assets/
 │   └── sprites/
-│       └── cat_sheet.png          # Master sprite sheet
+│       ├── IDLE.png               # 8-frame idle animation (640x80)
+│       ├── WALK.png               # 12-frame walk cycle (960x80)
+│       ├── SLEEP.png              # 8-frame sleep animation (640x80)
+│       └── ...                    # 13 additional sprite sheets (attack, climb, eat, etc.)
 ├── tests/
-│   ├── test_fsm.py
-│   ├── test_physics.py
-│   └── test_pet_state.py
+│   ├── __init__.py
+│   ├── test_config.py            # 21 tests — config constants validation
+│   ├── test_logger.py            # 6 tests — logging setup
+│   ├── test_platform.py          # 13 tests — platform detection, click-through
+│   ├── test_main.py              # 6 tests — QApplication bootstrap, Canvas wiring
+│   ├── test_canvas.py            # 6 tests — Canvas widget properties + paintEvent
+│   ├── test_sprites.py           # 11 tests — SpriteSheet loading, slicing, centering ✅
+│   └── test_animation.py         # 10 tests — QTimer animation, frame advancement ✅
 ├── pyproject.toml
 └── README.md
 ```
@@ -166,7 +175,7 @@ mochi/
 | `input_bridge.py` | Platform-native hotkey registration → Qt signal emission | `platform` (for OS detection) |
 | `toolbox.py` | Inventory UI widget, item deployment | `pet_state`, `config` |
 | `tray_icon.py` | System tray icon, context menu actions | `canvas`, `pet_state` |
-| `sprites.py` | Sprite sheet slicing, QPixmap cache, animation frame indexing | `config` |
+| `sprites.py` | Sprite sheet slicing, QPixmap cache, auto-centered frame extraction, animation frame indexing | `config` |
 | `platform.py` | OS detection, platform-specific window flag workarounds, Alt-key state polling, data directory resolution, single-instance enforcement | None |
 
 ---
@@ -472,32 +481,30 @@ When Alt is detected as held, `set_click_through(window, False)` is called. When
 
 **Toolbox mode:** When the toolbox hotkey is pressed, click-through is disabled to allow the user to interact with toolbox buttons. Click-through is re-enabled when the toolbox is dismissed (click outside, Escape, or hotkey toggle). The dismiss-click is consumed by the overlay and not forwarded to underlying windows.
 
-### 5.3 Animation Engine (`sprites.py`)
+### 5.3 Animation Engine (`sprites.py`) ✅
 
-The sprite sheet uses **80×64 pixel bounding boxes** containing **32×32 pixel cat frames** (centered, with padding for animation overshoot like tails and ears).
+The sprite sheet uses **80×64 pixel bounding boxes** (canvas cells) containing **32×32 pixel cat frames** (centered with padding for animation overshoot like tails and ears per the sprite sheet metadata).
 
 **Boot-time loading:**
-1. Load the master sprite sheet PNG into a single `QPixmap`.
-2. Slice individual frames using `QPixmap.copy(QRect(...))`.
-3. Cache all frames into a `dict[str, list[QPixmap]]` keyed by state name.
+1. The `asset_path()` helper resolves the asset directory for the current runtime mode (dev, PyInstaller, or Nuitka).
+2. Load the target PNG from the sprites directory using `QPixmap(str(path))`.
+3. Validate dimensions are multiples of `SPRITE_CELL_WIDTH` (80) × `SPRITE_CELL_HEIGHT` (64). Non-conforming files (e.g., `BOWL.png` at 16×16) are silently skipped with a warning log.
+4. Slice into individual frames using `QPixmap.copy(col * 80, row * 64, 80, 64)`.
+5. Run `_autocenter_frame()` on each raw frame — scans non-transparent pixel bounds and re-centers the content to eliminate frame-to-frame sliding.
+6. Cache all frames into a `dict[str, list[QPixmap]]` keyed by animation key.
 
 ```python
-SPRITE_MAP: dict[str, list[QPixmap]] = {
-    "idle":       [...],  # 4 frames (breathing cycle)
-    "walk_right": [...],  # 6 frames
-    "walk_left":  [...],  # 6 frames (mirrored)
-    "fall":       [...],  # 2 frames
-    "climb":      [...],  # 4 frames
-    "wall_slide": [...],  # 2 frames
-    "sleep":      [...],  # 4 frames (breathing + zzz)
-    "grabbed":    [...],  # 2 frames
-    "eat":        [...],  # 4 frames
-    "play":       [...],  # 4 frames
-    "pet":        [...],  # 3 frames
-}
+# In sprites.py — SpriteSheet class
+sheet = SpriteSheet("sprites/")
+idle_frames: list[QPixmap] = sheet.load("idle")  # 8 frames
 ```
 
-**Frame advancement:** Each animation timer tick increments the frame index. When the index exceeds the frame count for the current state, it wraps to 0 (looping animation).
+**Key design decisions:**
+- **Cell size:** 80×64 (not 64×64) — confirmed from sprite sheet metadata. Width is 80, height is 64. All 16 sprite PNGs have widths divisible by 80.
+- **Auto-centering:** Each frame's content is detected and re-centered within the 80×64 canvas to 1px tolerance. This prevents the "sliding" effect caused by unbalanced frame content (e.g., tail flick shifting the visual center of mass).
+- **Graceful handling:** Missing PNG files log a warning and return an empty list. `get_frames()` always returns a list (possibly empty) — never raises `KeyError`.
+
+**Frame advancement:** A `QTimer` fires every `ANIMATION_TICK_MS` (200ms, configurable). Each tick calls `_advance_frame()` which increments `_current_frame` modulo `len(_idle_frames)`, then calls `update()` to trigger `paintEvent`.
 
 ### 5.4 Physics & Collision (`physics.py`)
 
@@ -582,9 +589,9 @@ STATE_WRITE_DEBOUNCE_S: float = 5.0      # Min interval between disk writes
 ITEM_APPROACH_TIMEOUT_S: float = 10.0    # Cancel approach after this
 
 # Rendering
-ANIMATION_TICK_MS: int = 100             # 10 FPS
-SPRITE_CELL_WIDTH: int = 64
-SPRITE_CELL_HEIGHT: int = 64
+ANIMATION_TICK_MS: int = 200             # 5 FPS (~1.6s full idle cycle for 8 frames)
+SPRITE_CELL_WIDTH: int = 80              # Sprite sheet canvas cell width
+SPRITE_CELL_HEIGHT: int = 64             # Sprite sheet canvas cell height (sprite content is 32x32 within)
 SPRITE_SCALE: float = 1.0               # Base scale (HiDPI via 2× sprite sheet)
 
 # Polling
@@ -672,16 +679,18 @@ Each module creates its own logger: `logger = logging.getLogger(__name__)`.
 
 Run with `uv run pytest`. Coverage reported via `pytest-cov`.
 
-| Module | Test Focus |
-|---|---|
-| `test_config.py` | All config constants are typed correctly, positive values, valid ranges |
-| `test_logger.py` | Logging setup creates correct handlers, respects debug flag, file/console output |
-| `test_platform.py` | OS detection, data directory resolution (Windows/macOS/Linux), Alt-key stub, click-through toggle with platform mocking |
-| `test_main.py` | QApplication bootstrap, org/app name, logging initialization |
-| `test_canvas.py` | Canvas is QWidget subclass, correct window flags, translucent background, geometry matches primary screen, paintEvent doesn't raise |
-| `test_fsm.py` | (Planned) All state transitions fire correctly given triggers. Timer boundaries work |
-| `test_physics.py` | (Planned) Gravity acceleration, terminal velocity capping, collision detection against mock surfaces |
-| `test_pet_state.py` | (Planned) Metric decay calculation, JSON round-trip, corruption recovery, boundary clamping (0–100) |
+| Module | Test Focus | Status |
+|---|---|---|---|
+| `test_config.py` | All config constants are typed correctly, positive values, valid ranges | ✅ 21 tests |
+| `test_logger.py` | Logging setup creates correct handlers, respects debug flag, file/console output | ✅ 6 tests |
+| `test_platform.py` | OS detection, data directory resolution (Windows/macOS/Linux), Alt-key stub, click-through toggle with platform mocking | ✅ 13 tests |
+| `test_main.py` | QApplication bootstrap, org/app name, logging initialization, Canvas wiring | ✅ 6 tests |
+| `test_canvas.py` | Canvas is QWidget subclass, correct window flags, translucent background, geometry matches primary screen, paintEvent doesn't raise | ✅ 6 tests |
+| `test_sprites.py` | SpriteSheet class, 8-frame idle loading at 80x64 per frame, centering tolerance, error handling for missing/invalid files, multi-word keys | ✅ 11 tests |
+| `test_animation.py` | QTimer creation and interval, frame index advancement and wrap-around, drawPixmap called in paintEvent, green rect removal | ✅ 10 tests |
+| `test_fsm.py` | (Planned) All state transitions fire correctly given triggers. Timer boundaries work | 📋 Planned |
+| `test_physics.py` | (Planned) Gravity acceleration, terminal velocity capping, collision detection against mock surfaces | 📋 Planned |
+| `test_pet_state.py` | (Planned) Metric decay calculation, JSON round-trip, corruption recovery, boundary clamping (0–100) | 📋 Planned |
 
 ### 8.2 Integration Tests (pytest-qt)
 
@@ -699,7 +708,8 @@ def test_window_flags_set(qtbot):
 - **Canvas widget (implemented):** `test_canvas.py` — Window flags, translucent background, geometry, paint event.
 - **Main integration (implemented):** `test_main.py` — Canvas instantiation, `.show()` call, dimension logging, timer-based click-through setup.
 - **Click-through (implemented):** `test_platform.py` — Windows enable/disable via win32 helper, macOS/Linux no-op paths.
-- **Sprite loading (planned):** Verify all expected animation keys exist after sheet slicing.
+- **Sprite loading (implemented):** `test_sprites.py` — Sheet slicing produces correct frame count and dimensions, auto-centering verified within 2px tolerance, error paths for missing/invalid files.
+- **Animation timer (implemented):** `test_animation.py` — QTimer created at correct interval, frame index advances and wraps, paintEvent uses drawPixmap instead of fillRect.
 - **Hotkey bridge (planned):** Verify `InputBridge.register()` succeeds on each platform.
 - **Signal flow (planned):** Verify `EnvironmentPoller` → `platforms_updated` signal.
 

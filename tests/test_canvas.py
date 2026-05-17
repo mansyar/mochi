@@ -71,15 +71,13 @@ class TestCanvasWidget:
         painter = QPainter(canvas)
         try:
             # Should not raise
-            canvas.paintEvent(
-                MagicMock(rect=MagicMock(return_value=QRect(0, 0, 100, 100)))
-            )
+            canvas.paintEvent(MagicMock(rect=MagicMock(return_value=QRect(0, 0, 100, 100))))
         finally:
             painter.end()
 
-    @pytest.mark.skipif(True, reason="Pixel grab requires a visible display")
+    @pytest.mark.skipif(True, reason="OBSOLETE: green rect replaced by sprite")
     def test_green_pixel_at_bottom_center(self, qtbot: object) -> None:
-        """The bottom-center pixel of the canvas should be green (#00FF00)."""
+        """OBSOLETE — sprite rendering replaces the green rectangle."""
         from mochi import config
         from mochi.core.canvas import Canvas
 

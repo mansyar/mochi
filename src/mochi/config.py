@@ -36,8 +36,8 @@ ITEM_APPROACH_TIMEOUT_S: float = 10.0
 SCREEN_BOTTOM_MARGIN_PX: int = 48  # px clearance above OS taskbar/dock
 
 # ── Animation / Rendering ───────────────────────────────────────────────
-ANIMATION_TICK_MS: int = 100  # ms per animation frame tick
-SPRITE_CELL_WIDTH: int = 64  # px per sprite cell
+ANIMATION_TICK_MS: int = 200  # ms per animation frame tick (~1.6s full idle cycle)
+SPRITE_CELL_WIDTH: int = 80  # px per sprite canvas cell
 SPRITE_CELL_HEIGHT: int = 64  # px per sprite cell
 SPRITE_SCALE: float = 1.0  # base scale factor
 

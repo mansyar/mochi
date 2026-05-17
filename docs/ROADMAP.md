@@ -2,7 +2,7 @@
 
 ## Desktop Cat Pet — "Mochi"
 
-**Last Updated:** 2026-05-17 (Phase 1, Track 1.1 completed)
+**Last Updated:** 2026-05-17 (Phase 1, Track 1.2 completed)
 
 Each phase builds on the previous one. Each track within a phase is a **vertical slice** — it touches all layers needed (model, core, UI, tests) to deliver one testable, demoable behavior.
 
@@ -66,21 +66,27 @@ Each phase builds on the previous one. Each track within a phase is a **vertical
 - [x] `uv run mypy src/mochi/` — zero type errors
 - [x] Review completed and archived (see `conductor/archive/overlay_window_20260517/`)
 
-### Track 1.2 — Sprite Loading & Idle Animation
+### Track 1.2 — Sprite Loading & Idle Animation ✅
 
-**Modules:** `sprites.py`, `canvas.py`
+**Modules:** `sprites.py`, `canvas.py`, `config.py`
 
-| Task | Detail |
-|---|---|
-| Create placeholder sprite sheet | Minimal 4-frame idle animation (can be programmer art / colored squares) |
-| Implement `SpriteSheet` loader | Slice the sheet into `dict[str, list[QPixmap]]` at boot time |
-| Render idle sprite | Replace test rectangle with the idle sprite at screen bottom center |
-| Add animation timer | `QTimer` at 100ms, advance frame index, call `update()` |
-| Idle breathing cycle | 4-frame looping animation |
+| Task | Status | Detail |
+|---|---|---|
+| Implement `SpriteSheet` loader | ✅ Complete | `SpriteSheet` class in `sprites.py` — loads PNG, slices into 80x64 frame pixmaps, caches by animation key. Case-insensitive key→filename matching. `asset_path()` helper supports dev, PyInstaller, and Nuitka modes |
+| Auto-center sprite frames | ✅ Complete | `_autocenter_frame()` detects non-transparent content bounds and re-centers each frame within the canvas cell, eliminating sliding effects in the animation |
+| Render idle sprite | ✅ Complete | Canvas `paintEvent` draws the current idle frame via `QPainter.drawPixmap()` at screen bottom-center. Green rectangle completely removed |
+| Add animation timer | ✅ Complete | `QTimer` at 200ms (5 FPS), advances frame index counting modulo frame count, calls `update()` each tick |
+| Idle breathing cycle | ✅ Complete | 8-frame looping idle animation from `IDLE.png` (640x80 sheet, 80x64 cells, 32x32 sprite content auto-centered) |
+| Screen geometry fallback | ✅ Complete | `_screen_geo` stored at construction, used as fallback in `paintEvent` if `primaryScreen()` returns None |
 
-**Definition of Done:**
-- [ ] Cat sprite visible at screen bottom, breathing animation loops smoothly
-- [ ] No flickering or visual artifacts
+**Results:**
+- [x] Cat sprite visible at screen bottom with smooth, stable idle breathing animation (1.6s full cycle)
+- [x] `SpriteSheet` loader verified with all sprite PNGs (16 sheets, varying widths all divisible by 80)
+- [x] Non-conforming sprites (BOWL.png 16x16) handled gracefully — logged, skipped
+- [x] `uv run pytest` — **79 passed, 1 skipped, 93% coverage**
+- [x] `uv run ruff check src/` — zero lint errors
+- [x] `uv run mypy src/mochi/` — zero type errors
+- [x] User confirmed and reviewed — see `conductor/archive/sprite_idle_20260517/`
 
 ### Track 1.3 — Basic FSM + Walk on Screen Bottom
 
