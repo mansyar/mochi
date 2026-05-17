@@ -4,7 +4,7 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Foundation Phase Complete — Active Development
+**Status:** Phase 1, Track 1.1 Complete — Active Development
 
 ---
 
@@ -674,26 +674,34 @@ Run with `uv run pytest`. Coverage reported via `pytest-cov`.
 
 | Module | Test Focus |
 |---|---|
-| `test_fsm.py` | All state transitions fire correctly given triggers. Timer boundaries work. No invalid transitions possible |
-| `test_physics.py` | Gravity acceleration, terminal velocity capping, collision detection against mock surfaces |
-| `test_pet_state.py` | Metric decay calculation, JSON round-trip, corruption recovery, boundary clamping (0–100) |
+| `test_config.py` | All config constants are typed correctly, positive values, valid ranges |
+| `test_logger.py` | Logging setup creates correct handlers, respects debug flag, file/console output |
+| `test_platform.py` | OS detection, data directory resolution (Windows/macOS/Linux), Alt-key stub, click-through toggle with platform mocking |
+| `test_main.py` | QApplication bootstrap, org/app name, logging initialization |
+| `test_canvas.py` | Canvas is QWidget subclass, correct window flags, translucent background, geometry matches primary screen, paintEvent doesn't raise |
+| `test_fsm.py` | (Planned) All state transitions fire correctly given triggers. Timer boundaries work |
+| `test_physics.py` | (Planned) Gravity acceleration, terminal velocity capping, collision detection against mock surfaces |
+| `test_pet_state.py` | (Planned) Metric decay calculation, JSON round-trip, corruption recovery, boundary clamping (0–100) |
 
 ### 8.2 Integration Tests (pytest-qt)
 
 Use `pytest-qt`'s `qtbot` fixture for Qt widget and signal testing. Set `qt_api = "pyside6"` in `pyproject.toml`.
 
 ```python
-# Example: test that InputBridge emits toolbox_requested
-def test_hotkey_signal(qtbot):
-    bridge = InputBridge()
-    with qtbot.waitSignal(bridge.toolbox_requested, timeout=1000):
-        # Simulate the native hotkey event
-        bridge.toolbox_requested.emit()
+# Example: test that Canvas widget has correct properties
+def test_window_flags_set(qtbot):
+    canvas = Canvas()
+    qtbot.addWidget(canvas)
+    flags = canvas.windowFlags()
+    assert flags & Qt.FramelessWindowHint
 ```
 
-- **Sprite loading:** Verify all expected animation keys exist after sheet slicing.
-- **Hotkey bridge:** Verify `InputBridge.register()` succeeds on each platform and that signals emit correctly when the native hotkey event is received.
-- **Signal flow:** Verify `EnvironmentPoller` → `platforms_updated` signal is receivable on the main thread via `qtbot.waitSignal()`.
+- **Canvas widget (implemented):** `test_canvas.py` — Window flags, translucent background, geometry, paint event.
+- **Main integration (implemented):** `test_main.py` — Canvas instantiation, `.show()` call, dimension logging, timer-based click-through setup.
+- **Click-through (implemented):** `test_platform.py` — Windows enable/disable via win32 helper, macOS/Linux no-op paths.
+- **Sprite loading (planned):** Verify all expected animation keys exist after sheet slicing.
+- **Hotkey bridge (planned):** Verify `InputBridge.register()` succeeds on each platform.
+- **Signal flow (planned):** Verify `EnvironmentPoller` → `platforms_updated` signal.
 
 ### 8.3 Manual QA Checklist
 

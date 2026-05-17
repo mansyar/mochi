@@ -4,9 +4,9 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Foundation Phase Complete — Active Development
+**Status:** Phase 1, Track 1.1 Complete — Active Development
 
-> **Project Status:** Phase 0 (Project Foundation) is complete. The project skeleton is fully set up with dev tooling (uv, Ruff, mypy, pytest), 43 unit tests passing with 85% coverage, and zero lint/type errors. See `ROADMAP.md` for the full development plan.
+> **Project Status:** Phase 0 (Project Foundation) is complete. **Track 1.1 (Transparent Overlay Window)** is also complete — the transparent overlay rendering surface is operational with a fullscreen, click-through Qt window and a green test rectangle. 59 tests passing with 93% coverage, zero lint/type errors. See `ROADMAP.md` for the full development plan.
 
 ---
 
