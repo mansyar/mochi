@@ -196,8 +196,8 @@ class Canvas(QWidget):
             if frames and self._current_frame < len(frames):
                 frame = frames[self._current_frame]
 
-                if self._physics.direction == -1:
-                    # Flip horizontally for leftward movement
+                if self._current_sprite_key == "walk" and self._physics.direction == 1:
+                    # Walk sprites face left by default; flip for rightward movement
                     painter.save()
                     painter.scale(-1.0, 1.0)
                     painter.drawPixmap(-x - cell_w, y, frame)
