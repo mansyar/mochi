@@ -35,35 +35,35 @@
 ## Phase 2: Idle Sprite Rendering & Animation
 
 ### Task 2.1: Write tests for Canvas sprite rendering and animation (Red Phase)
-- [ ] Create `tests/test_animation.py` for Canvas timer and frame advancement tests:
-    - [ ] Test: Canvas creates a `QTimer` for animation tick
-    - [ ] Test: Animation timer interval equals `ANIMATION_TICK_MS` (100ms)
-    - [ ] Test: Frame index advances by 1 on each tick, wraps to 0 after `len(idle_frames)`-1
-    - [ ] Test: `paintEvent` calls `painter.drawPixmap` with the correct current frame
-    - [ ] Test: Green rectangle is no longer drawn (no `QColor("#00FF00")` or `fillRect` with that color)
-- [ ] Update skipped `test_green_pixel_at_bottom_center`: update comment to indicate the test is obsolete (sprite replaces green rect); optionally remove or keep skipped
-- [ ] Run tests and confirm they fail (Red Phase)
+- [x] Create `tests/test_animation.py` for Canvas timer and frame advancement tests:
+    - [x] Test: Canvas creates a `QTimer` for animation tick
+    - [x] Test: Animation timer interval equals `ANIMATION_TICK_MS` (100ms)
+    - [x] Test: Frame index advances by 1 on each tick, wraps to 0 after `len(idle_frames)`-1
+    - [x] Test: `paintEvent` calls `painter.drawPixmap` with the correct current frame
+    - [x] Test: Green rectangle is no longer drawn (no `QColor("#00FF00")` or `fillRect` with that color)
+- [x] Update skipped `test_green_pixel_at_bottom_center`: update comment to indicate the test is obsolete (sprite replaces green rect); optionally remove or keep skipped
+- [x] Run tests and confirm they fail (Red Phase)
 
 ### Task 2.2: Wire Canvas with SpriteSheet and animation timer (Green Phase)
-- [ ] In `Canvas.__init__()`:
-    - [ ] Instantiate `SpriteSheet` pointing to `assets/sprites/`
-    - [ ] Call `spritesheet.load("idle")` to cache idle frames
-    - [ ] Create `QTimer` set to `ANIMATION_TICK_MS` interval
-    - [ ] Connect timer timeout to slot that advances `_current_frame` and calls `update()`
-    - [ ] Start the timer
-- [ ] Add instance variables: `_spritesheet: SpriteSheet`, `_current_frame: int`, `_idle_frames: list[QPixmap]`
-- [ ] In `paintEvent()`:
-    - [ ] Replace green `fillRect` with `painter.drawPixmap()` using current idle frame
-    - [ ] Position: screen bottom-center (same X/Y formula as green rect)
-- [ ] Remove `QColor("#00FF00")` import/usage from `canvas.py` (no longer needed)
-- [ ] Remove `QColor` import if no longer used; remove `QRect` import if no longer used
-- [ ] Run tests and confirm they pass (Green Phase)
+- [x] In `Canvas.__init__()`:
+    - [x] Instantiate `SpriteSheet` pointing to `assets/sprites/`
+    - [x] Call `spritesheet.load("idle")` to cache idle frames
+    - [x] Create `QTimer` set to `ANIMATION_TICK_MS` interval
+    - [x] Connect timer timeout to slot that advances `_current_frame` and calls `update()`
+    - [x] Start the timer
+- [x] Add instance variables: `_spritesheet: SpriteSheet`, `_current_frame: int`, `_idle_frames: list[QPixmap]`
+- [x] In `paintEvent()`:
+    - [x] Replace green `fillRect` with `painter.drawPixmap()` using current idle frame
+    - [x] Position: screen bottom-center (same X/Y formula as green rect)
+- [x] Remove `QColor("#00FF00")` import/usage from `canvas.py` (no longer needed)
+- [x] Remove `QColor` import if no longer used; remove `QRect` import if no longer used
+- [x] Run tests and confirm they pass (Green Phase)
 
 ### Task 2.3: Quality gate — full verification
-- [ ] `uv run ruff check src/` — zero errors
-- [ ] `uv run ruff format --check src/` — zero violations
-- [ ] `uv run mypy src/mochi/` — zero errors
-- [ ] `uv run pytest` — all tests pass, coverage ≥ 80%
+- [~] `uv run ruff check src/` — zero errors
+- [~] `uv run ruff format --check src/` — zero violations
+- [~] `uv run mypy src/mochi/` — zero errors
+- [~] `uv run pytest` — all tests pass, coverage ≥ 80%
 
 ## Phase 3: Phase Completion Verification
 
