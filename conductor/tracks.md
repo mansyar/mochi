@@ -24,7 +24,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - ~~[x] **Track: Track 1.3 — Basic FSM + Walk on Screen Bottom**~~
   ~~*Link: [./archive/basic_fsm_walk_20260517/](./archive/basic_fsm_walk_20260517/)*~~
 
----
-
-- [x] **Track: Track 2.1 — Window Polling & Surface Detection**
-  *Link: [./tracks/window_polling_20260517/](./tracks/window_polling_20260517/)*
+- ~~[x] **Track: Track 2.1 — Window Polling & Surface Detection**~~
+  ~~*Link: [./archive/window_polling_20260517/](./archive/window_polling_20260517/)*~~
