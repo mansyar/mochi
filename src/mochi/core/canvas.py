@@ -91,9 +91,10 @@ class Canvas(QWidget):
                 return
             geo = screen.availableGeometry()
 
-            cell = config.SPRITE_CELL_WIDTH  # 64 px
-            x = (geo.width() - cell) // 2
-            y = geo.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - cell
+            cell_w = config.SPRITE_CELL_WIDTH  # 80 px (frame canvas width)
+            cell_h = config.SPRITE_CELL_HEIGHT  # 64 px
+            x = (geo.width() - cell_w) // 2
+            y = geo.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - cell_h
 
             if self._idle_frames and self._current_frame < len(self._idle_frames):
                 frame = self._idle_frames[self._current_frame]

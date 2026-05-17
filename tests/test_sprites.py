@@ -38,27 +38,27 @@ class TestSpriteSheetFunctionality:
     CELL_W = config.SPRITE_CELL_WIDTH  # 64
     CELL_H = config.SPRITE_CELL_HEIGHT  # 64
 
-    def test_load_idle_returns_10_frames(self, qtbot: object) -> None:
-        """load('idle') should return a list of 10 QPixmap frames (640÷64)."""
+    def test_load_idle_returns_8_frames(self, qtbot: object) -> None:
+        """load('idle') should return 8 frames (640÷80 = 8 canvas cells)."""
         from mochi.ui.sprites import SpriteSheet
 
         sheet = SpriteSheet(self.SPRITES_DIR)
         frames = sheet.load("idle")
         assert isinstance(frames, list)
-        assert len(frames) == 10
+        assert len(frames) == 8
         for frame in frames:
             assert isinstance(frame, QPixmap)
 
-    def test_each_frame_is_64x64(self, qtbot: object) -> None:
-        """Each loaded frame pixmap should be 64x64 pixels."""
+    def test_each_frame_is_80x64(self, qtbot: object) -> None:
+        """Each loaded frame canvas should be 80x64 pixels."""
         from mochi.ui.sprites import SpriteSheet
 
         sheet = SpriteSheet(self.SPRITES_DIR)
         frames = sheet.load("idle")
         for frame in frames:
             assert not frame.isNull()
-            assert frame.width() == self.CELL_W
-            assert frame.height() == self.CELL_H
+            assert frame.width() == self.CELL_W  # 80 px canvas width
+            assert frame.height() == self.CELL_H  # 64 px
 
     def test_load_nonexistent_returns_empty_list(self, qtbot: object) -> None:
         """Loading a non-existent animation key should log warning and return empty list."""
@@ -78,7 +78,7 @@ class TestSpriteSheetFunctionality:
         loaded = sheet.load("idle")
         cached = sheet.get_frames("idle")
         assert cached is loaded  # same list object
-        assert len(cached) == 10
+        assert len(cached) == 8
 
     def test_get_frames_nonexistent_returns_empty_list(self, qtbot: object) -> None:
         """get_frames('nonexistent') should return empty list, not raise KeyError."""
@@ -104,16 +104,18 @@ class TestSpriteSheetFunctionality:
 
         sheet = SpriteSheet(self.SPRITES_DIR)
         frames = sheet.load("idle")
-        cell = self.CELL_W
-        frame_center = (cell - 1) / 2.0
+        cell_w = self.CELL_W  # 80
+        cell_h = self.CELL_H  # 64
+        center_x = (cell_w - 1) / 2.0
+        center_y = (cell_h - 1) / 2.0
 
         for idx, frame in enumerate(frames):
             image = frame.toImage()
-            min_x, max_x = cell, 0
-            min_y, max_y = cell, 0
+            min_x, max_x = cell_w, 0
+            min_y, max_y = cell_h, 0
 
-            for y in range(cell):
-                for x in range(cell):
+            for y in range(cell_h):
+                for x in range(cell_w):
                     px = image.pixelColor(x, y)
                     if px.alpha() > 0:
                         if x < min_x:
@@ -128,15 +130,15 @@ class TestSpriteSheetFunctionality:
             if max_x > 0:  # Has content
                 content_cx = (min_x + max_x) / 2.0
                 content_cy = (min_y + max_y) / 2.0
-                offset_x = abs(content_cx - frame_center)
-                offset_y = abs(content_cy - frame_center)
+                offset_x = abs(content_cx - center_x)
+                offset_y = abs(content_cy - center_y)
                 assert offset_x <= 2.0, (
                     f"Frame {idx}: content center_x {content_cx:.1f} is "
-                    f"{offset_x:.1f}px from frame center {frame_center}"
+                    f"{offset_x:.1f}px from frame center {center_x}"
                 )
                 assert offset_y <= 2.0, (
                     f"Frame {idx}: content center_y {content_cy:.1f} is "
-                    f"{offset_y:.1f}px from frame center {frame_center}"
+                    f"{offset_y:.1f}px from frame center {center_y}"
                 )
 
     def test_attack_1_multiword_key(self, qtbot: object) -> None:

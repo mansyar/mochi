@@ -72,7 +72,8 @@ class SpriteSheet:
         to the configured assets root.
     """
 
-    _CELL_SIZE: ClassVar[int] = config.SPRITE_CELL_WIDTH  # 64 px
+    _CELL_W: ClassVar[int] = config.SPRITE_CELL_WIDTH  # 80 px (canvas width per frame)
+    _CELL_H: ClassVar[int] = config.SPRITE_CELL_HEIGHT  # 64 px
 
     def __init__(self, asset_dir: str) -> None:
         self._asset_dir: str = asset_dir
@@ -125,27 +126,29 @@ class SpriteSheet:
 
         w = pixmap.width()
         h = pixmap.height()
-        cell = self._CELL_SIZE
+        cell_w = self._CELL_W
+        cell_h = self._CELL_H
 
         # Silently skip files whose dimensions are not multiples of cell size.
-        if w % cell != 0 or h % cell != 0:
+        if w % cell_w != 0 or h % cell_h != 0:
             logger.warning(
-                "Sprite sheet %s has non-conforming dimensions %dx%d (cell %d), skipping",
+                "Sprite sheet %s has non-conforming dimensions %dx%d (cell %dx%d), skipping",
                 matched.name,
                 w,
                 h,
-                cell,
+                cell_w,
+                cell_h,
             )
             self._cache[animation_key] = []
             return self._cache[animation_key]
 
-        cols = w // cell
-        rows = h // cell
+        cols = w // cell_w
+        rows = h // cell_h
         frames: list[QPixmap] = []
 
         for row in range(rows):
             for col in range(cols):
-                raw_frame = pixmap.copy(col * cell, row * cell, cell, cell)
+                raw_frame = pixmap.copy(col * cell_w, row * cell_h, cell_w, cell_h)
                 centered = self._autocenter_frame(raw_frame)
                 frames.append(centered)
 
@@ -166,7 +169,7 @@ class SpriteSheet:
         Parameters
         ----------
         frame : QPixmap
-            The raw sliced frame pixmap (64x64).
+            The raw sliced frame pixmap (80x64).
 
         Returns
         -------
@@ -174,15 +177,16 @@ class SpriteSheet:
             The centered frame (the original is returned unchanged if
             the content is already within 1 pixel of the center).
         """
-        cell = SpriteSheet._CELL_SIZE
+        cell_w = SpriteSheet._CELL_W
+        cell_h = SpriteSheet._CELL_H
         image = frame.toImage()
 
         # Scan for non-transparent content bounds.
-        min_x, max_x = cell, 0
-        min_y, max_y = cell, 0
+        min_x, max_x = cell_w, 0
+        min_y, max_y = cell_h, 0
 
-        for y in range(cell):
-            for x in range(cell):
+        for y in range(cell_h):
+            for x in range(cell_w):
                 px = image.pixelColor(x, y)
                 if px.alpha() > 0:
                     if x < min_x:
@@ -200,17 +204,18 @@ class SpriteSheet:
 
         content_cx = (min_x + max_x) / 2.0
         content_cy = (min_y + max_y) / 2.0
-        frame_center = (cell - 1) / 2.0
+        center_x = (cell_w - 1) / 2.0
+        center_y = (cell_h - 1) / 2.0
 
-        offset_x = round(content_cx - frame_center)
-        offset_y = round(content_cy - frame_center)
+        offset_x = round(content_cx - center_x)
+        offset_y = round(content_cy - center_y)
 
         # Already centered within 1 px — skip reprocessing.
         if abs(offset_x) <= 1 and abs(offset_y) <= 1:
             return frame
 
         # Create a new transparent pixmap and draw the content centered.
-        centered = QPixmap(cell, cell)
+        centered = QPixmap(cell_w, cell_h)
         centered.fill(Qt.GlobalColor.transparent)
 
         painter = QPainter(centered)
