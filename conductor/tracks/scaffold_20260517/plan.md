@@ -43,12 +43,15 @@
 - [x] Run `uv run ruff check src/` — zero lint errors
 - [x] Run `uv run mypy src/mochi/` — zero type errors (pending main.py)
 
-### Task 0.5: Write tests for logger.py
-- [ ] Write `tests/test_logger.py`:
-    - [ ] Test that `setup_logging()` creates both console and file handlers
-    - [ ] Test that logging at INFO level produces output
-    - [ ] Test that log format matches expected pattern
-- [ ] Run tests and confirm they fail — **Red Phase**
+### Task 0.5: Write tests for logger.py `23b6c1c`
+- [x] Write `tests/test_logger.py`:
+    - [x] Test that `setup_logging()` creates both console and file handlers
+    - [x] Test that logging at INFO level produces output
+    - [x] Test that log format matches expected pattern
+    - [x] Test that debug=True enables DEBUG output
+    - [x] Test that debug=False (default) suppresses DEBUG
+    - [x] Test that log file is actually written
+- [x] Run tests and confirm they fail — **Red Phase**
 
 ### Task 0.6: Implement logger.py
 - [ ] Create `src/mochi/utils/logger.py` with `setup_logging(debug: bool = False) -> None` function
