@@ -197,7 +197,7 @@ class TestPhysicsScreenBounds:
         assert not edge_hit
 
     def test_clamps_position_at_extreme_right(self) -> None:
-        """Cat position should not exceed screen_width + half_sprite."""
+        """Cat position should be clamped to overshoot boundary at right edge."""
         from mochi.core.physics import Physics
 
         p = Physics()
@@ -206,8 +206,10 @@ class TestPhysicsScreenBounds:
 
         p.update(1.0, PetState.Walk, self.SCREEN_WIDTH, self.SPRITE_WIDTH)
 
-        max_allowed = self.SCREEN_WIDTH + self.SPRITE_WIDTH / 2
-        assert p.x <= max_allowed, f"x ({p.x}) should not exceed {max_allowed}"
+        expected = self.SCREEN_WIDTH - self.SPRITE_WIDTH / 2
+        assert p.x == pytest.approx(expected, rel=1e-6), (
+            f"x ({p.x}) should be clamped to {expected}"
+        )
 
     def test_clamps_position_at_extreme_left(self) -> None:
         """Cat position should not exceed -(half_sprite)."""

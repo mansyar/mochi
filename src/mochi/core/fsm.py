@@ -33,7 +33,7 @@ PetState.Idle = PetState()
 PetState.Walk = PetState()
 PetState.EdgePause = PetState()
 
-# Tuple lookup for repr / display.
+# Dict lookup for repr / display.
 _STATE_NAMES: dict[PetState, str] = {
     PetState.Idle: "Idle",
     PetState.Walk: "Walk",

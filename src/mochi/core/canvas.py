@@ -163,6 +163,8 @@ class Canvas(QWidget):
 
         # 7. Advance frame index
         frames = self._animations.get(self._current_sprite_key, [])
+        if not frames and self._current_sprite_key == "walk":
+            logger.warning("No walk frames loaded — cat will be invisible during Walk state")
         if frames:
             self._current_frame = (self._current_frame + 1) % len(frames)
 
@@ -187,8 +189,6 @@ class Canvas(QWidget):
             if geo is None:
                 return
 
-            cell_w = config.SPRITE_CELL_WIDTH
-
             x = int(self._physics.x)
             y = int(self._physics.y)
 
@@ -201,7 +201,7 @@ class Canvas(QWidget):
                 if self._physics.direction == 1:
                     painter.save()
                     painter.scale(-1.0, 1.0)
-                    painter.drawPixmap(-x - cell_w, y, frame)
+                    painter.drawPixmap(-x, y, frame)
                     painter.restore()
                 else:
                     painter.drawPixmap(x, y, frame)
