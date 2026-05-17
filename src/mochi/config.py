@@ -42,7 +42,7 @@ SPRITE_CELL_HEIGHT: int = 64  # px per sprite cell
 SPRITE_SCALE: float = 1.0  # base scale factor
 
 # ── Window Polling ──────────────────────────────────────────────────────
-WINDOW_POLL_INTERVAL_MS: int = 200  # ms between environment scans
+WINDOW_POLL_INTERVAL_MS: int = 300  # ms between environment scans
 
 # ── Item Cooldowns ──────────────────────────────────────────────────────
 FOOD_COOLDOWN_S: float = 30.0
