@@ -21,5 +21,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Track 1.3 — Basic FSM + Walk on Screen Bottom**
+- [x] **Track: Track 1.3 — Basic FSM + Walk on Screen Bottom**
   *Link: [./tracks/basic_fsm_walk_20260517/](./tracks/basic_fsm_walk_20260517/)*
