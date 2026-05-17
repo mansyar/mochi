@@ -7,7 +7,8 @@
 - [ ] Add runtime dependencies: PySide6-Essentials >= 6.7, < 7.0; pywinctl >= 0.4, < 1.0; pymonctl >= 0.4, < 1.0
 - [ ] Add dev dependencies: pytest >= 8.0, pytest-qt >= 4.4, pytest-cov >= 6.0, pytest-xdist >= 3.5, mypy >= 1.13, PyInstaller >= 6.0
 - [ ] Add release dependencies: Nuitka >= 2.0
-- [ ] Configure Ruff: target-version py311, line-length 100, src = ["src"], select = [E, W, F, I, N, UP, B, SIM, RUF]
+- [ ] Configure Ruff lint: target-version py311, line-length 100, src = ["src"], select = [E, W, F, I, N, UP, B, SIM, RUF], isort known-first-party = ["mochi"]
+- [ ] Configure Ruff format: line-length 100 (inherits from parent), docstring-code-format = true
 - [ ] Configure mypy: strict mode, python_version 3.11, ignore missing imports for pywinctl and pymonctl
 - [ ] Configure pytest: testpaths = ["tests"], qt_api = "pyside6", addopts with coverage
 - [ ] Configure coverage: source = ["src/mochi"], omit __main__.py
@@ -19,7 +20,7 @@
 - [ ] Create `__init__.py` in each Python package directory (src/mochi, models, core, ui, utils)
 - [ ] Create empty `tests/__init__.py` for pytest discovery
 - [ ] Create placeholder `assets/sprites/.gitkeep` to preserve the directory
-- [ ] Create `src/mochi/__main__.py` as `python -m mochi` entry point
+- [ ] Create `src/mochi/__main__.py` as a minimal `python -m mochi` entry point (stub that imports `main` — will be completed in Task 0.10)
 - [ ] Verify: `uv run python -c "import mochi"` succeeds with no errors
 
 ### Task 0.3: Write tests for config.py
@@ -69,18 +70,21 @@
 ### Task 0.8: Implement platform.py stubs
 - [ ] Create `src/mochi/utils/platform.py`:
     - [ ] Implement `get_platform() -> str` returning sys.platform
-    - [ ] Implement `get_data_dir() -> Path` resolving OS-appropriate data directory with fallback
+    - [ ] Implement `get_data_dir() -> Path` resolving OS-appropriate data directory with fallback (`%APPDATA%/Mochi`, `~/Library/Application Support/Mochi`, or `~/.local/share/mochi`), creating it via `mkdir(parents=True, exist_ok=True)` on first call
     - [ ] Implement `is_alt_held() -> bool` returning False as default stub
-    - [ ] Implement `set_click_through(window, enabled: bool) -> None` with platform-specific branching (win32 stub with ctypes placeholder, darwin/linux no-op stubs)
+    - [ ] Implement `set_click_through(window: "QWidget", enabled: bool) -> None` with platform-specific branching (win32 stub with ctypes placeholder for `WS_EX_TRANSPARENT`, darwin/linux no-op stubs). Use string annotation to avoid forward-import issues
 - [ ] Run tests and confirm they pass — **Green Phase**
 - [ ] Run `uv run ruff check src/` — zero lint errors
 - [ ] Run `uv run mypy src/mochi/` — zero type errors
 
-### Task 0.9: Write tests for main.py
+### Task 0.9: Write tests for main.py and __main__.py
 - [ ] Write `tests/test_main.py`:
     - [ ] Test that main module's `create_application()` returns a QApplication instance
     - [ ] Test that application name is set to "Mochi"
     - [ ] Test that logging is initialized on startup
+- [ ] Write `tests/test_entry.py`:
+    - [ ] Test that `__main__.py` has the `if __name__ == '__main__':` guard pattern
+    - [ ] Test that `__main__.py` imports the `main` module
 - [ ] Run tests and confirm they fail — **Red Phase**
 
 ### Task 0.10: Implement main.py
@@ -90,7 +94,7 @@
     - [ ] Call setup_logging()
     - [ ] Create QApplication instance
     - [ ] Log "Mochi started" message
-    - [ ] Wire `__main__.py` to call main entry point
+    - [ ] Wire `__main__.py` to call main entry point via `main.main()` from `if __name__ == '__main__':` guard
 - [ ] Run tests and confirm they pass — **Green Phase**
 - [ ] Verify: `uv run python -m mochi` launches and logs startup message
 - [ ] Run `uv run ruff check src/` — zero lint errors
@@ -99,7 +103,14 @@
 ### Task 0.11: Final tooling verification
 - [ ] Run full test suite: `uv run pytest` — all tests pass
 - [ ] Run linter: `uv run ruff check src/` — zero errors
+- [ ] Run formatter check: `uv run ruff format --check src/` — zero formatting violations
 - [ ] Run type checker: `uv run mypy src/mochi/` — zero errors
+- [ ] Verify all config constants importable: `uv run python -c "from mochi.config import *"` — no errors
 - [ ] Verify application launches: `uv run python -m mochi` — logs startup and exits cleanly
+- [ ] Verify `uv.lock` is committed to version control
 
+### Task 0.12: Phase Completion Verification
 - [ ] Task: Conductor - User Manual Verification 'Phase 0: Project Foundation' (Protocol in workflow.md)
+    - [ ] Run automated tests per Phase Completion Protocol
+    - [ ] Present manual verification plan to user
+    - [ ] Create checkpoint commit with auditable git notes

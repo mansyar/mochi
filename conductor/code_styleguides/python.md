@@ -3,7 +3,7 @@
 This document summarizes key rules and best practices from the Google Python Style Guide.
 
 ## 1. Python Language Rules
-- **Linting:** Run `pylint` on your code to catch bugs and style issues.
+- **Linting:** Run `ruff` on your code to catch bugs and style issues (configured in `pyproject.toml`).
 - **Imports:** Use `import x` for packages/modules. Use `from x import y` only when `y` is a submodule.
 - **Exceptions:** Use built-in exception classes. Do not use bare `except:` clauses.
 - **Global State:** Avoid mutable global state. Module-level constants are okay and should be `ALL_CAPS_WITH_UNDERSCORES`.
@@ -13,7 +13,9 @@ This document summarizes key rules and best practices from the Google Python Sty
 - **Type Annotations:** Strongly encouraged for all public APIs.
 
 ## 2. Python Style Rules
-- **Line Length:** Maximum 80 characters.
+- **Line Length:** Maximum 80 characters.  
+
+  **⚠️ Project Override:** `pyproject.toml` configures Ruff with `line-length = 100`. This project-approved deviation allows slightly longer lines for readability. Prefer 80 where natural, but the linter enforces 100 as the hard limit.
 - **Indentation:** 4 spaces per indentation level. Never use tabs.
 - **Blank Lines:** Two blank lines between top-level definitions (classes, functions). One blank line between method definitions.
 - **Whitespace:** Avoid extraneous whitespace. Surround binary operators with single spaces.

@@ -12,7 +12,7 @@ This track covers the full project setup: package management, directory structur
 |---|---|
 | `pyproject.toml` | Project metadata, dependencies, dev tool configuration (ruff, mypy, pytest, coverage) |
 | `src/mochi/__init__.py` | Package marker |
-| `src/mochi/__main__.py` | `python -m mochi` entry point |
+| `src/mochi/__main__.py` | `python -m mochi` entry point (supplements TDD — not in original directory structure) |
 | `src/mochi/main.py` | `QApplication` bootstrap |
 | `src/mochi/config.py` | All tunable constants (physics, FSM timers, metrics, rendering, polling, items, onboarding) |
 | `src/mochi/utils/__init__.py` | Package marker |
@@ -25,6 +25,7 @@ This track covers the full project setup: package management, directory structur
 - [ ] `uv run python -m mochi` launches, logs a startup message, and exits cleanly
 - [ ] `uv run pytest` discovers the test directory with zero failures
 - [ ] `uv run ruff check src/` — zero lint errors
+- [ ] `uv run ruff format --check src/` — zero formatting violations
 - [ ] `uv run mypy src/mochi/` — zero type errors
 - [ ] All config constants are importable from `mochi.config`
 - [ ] `uv.lock` is committed to version control
