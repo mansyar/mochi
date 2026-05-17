@@ -49,25 +49,19 @@
     - [x] Run `uv run ruff check src/` — zero errors
     - [x] Run `uv run mypy src/mochi/` — zero errors
 
-### Task 3: Wire Canvas into `main.py`
-- [ ] **Sub-task 3.1: Write failing tests for main.py integration (Red)**
-    - [ ] Add Canvas mock to existing `test_main.py` — patch `mochi.main.Canvas` so existing tests remain unbroken
-    - [ ] Add new test: verify that `main()` instantiates Canvas and calls `.show()`
-    - [ ] Add new test: verify that Canvas dimensions are logged at INFO level
-    - [ ] Run tests and confirm they fail (no Canvas import in main.py yet)
-- [ ] **Sub-task 3.2: Modify main.py to create and show Canvas (Green)**
-    - [ ] Import Canvas in `main.py`: `from mochi.core.canvas import Canvas`
-    - [ ] Import `QTimer` for deferred click-through setup
-    - [ ] In the `main()` function (NOT `create_application()`), instantiate Canvas after QApplication:
-        ```python
-        canvas = Canvas()
-        canvas.show()
-        logger.info("Canvas created: %dx%d", canvas.width(), canvas.height())
-        QTimer.singleShot(0, lambda: set_click_through(canvas, True))
-        ```
-    - [ ] Run tests and confirm all pass (existing tests + new tests)
-    - [ ] Run `uv run ruff check src/` — zero errors
-    - [ ] Run `uv run mypy src/mochi/` — zero errors
+### Task 3: Wire Canvas into `main.py` [2a162f2]
+- [x] **Sub-task 3.1: Write failing tests for main.py integration (Red)**
+    - [x] Add Canvas mock to existing `test_main.py` — patch `mochi.main.Canvas` so existing tests remain unbroken
+    - [x] Add new test: verify that `main()` instantiates Canvas and calls `.show()`
+    - [x] Add new test: verify that Canvas dimensions are logged at INFO level
+    - [x] Add new test: verify QTimer.singleShot schedules click-through
+    - [x] Run tests and confirm they fail (Canvas/QTimer not imported; SystemExit)
+- [x] **Sub-task 3.2: Modify main.py to create and show Canvas (Green)**
+    - [x] Import Canvas, QTimer, set_click_through in main.py
+    - [x] In `main()`, instantiate Canvas after QApplication, show, log, schedule click-through
+    - [x] Run tests and confirm all pass (59 tests)
+    - [x] Run `uv run ruff check src/` — zero errors
+    - [x] Run `uv run mypy src/mochi/` — zero errors
 
 ### Task 4: Final verification & code quality
 - [ ] Run full test suite: `uv run pytest` — all tests pass
