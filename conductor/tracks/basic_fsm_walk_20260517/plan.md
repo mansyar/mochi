@@ -45,7 +45,7 @@
     - [x] Run tests: confirm all pass (Green phase)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Physics Engine' (Protocol in workflow.md) `53c076b`
 
-## Phase 3: Canvas Integration & Walk Animation
+## Phase 3: Canvas Integration & Walk Animation [checkpoint: 2232674]
 
 > **Goal:** Wire FSM + Physics into the Canvas animation loop, implement direction-aware sprite rendering with edge pause behavior.
 
