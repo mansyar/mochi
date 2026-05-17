@@ -155,7 +155,7 @@ class TestPhysicsScreenBounds:
         assert edge_hit, "Should signal edge hit at left boundary"
 
     def test_half_sprite_overshoot_allowed_before_edge_hit(self) -> None:
-        """Cat should be allowed to go half sprite width past edge without signaling."""
+        """Cat at overshoot boundary that moves past triggers edge hit and gets clamped."""
         from mochi.core.physics import Physics
 
         p = Physics()
@@ -165,7 +165,11 @@ class TestPhysicsScreenBounds:
 
         edge_hit = p.update(0.01, PetState.Walk, self.SCREEN_WIDTH, self.SPRITE_WIDTH)
 
-        assert not edge_hit, "Exactly at overshoot boundary should NOT signal edge hit"
+        # Movement pushes past boundary → edge hit, position clamped back to boundary
+        assert edge_hit, "Moving past overshoot boundary should signal edge hit"
+        assert p.x == pytest.approx(self.SCREEN_WIDTH - half, rel=1e-6), (
+            "Position should be clamped to overshoot boundary"
+        )
 
     def test_physics_does_not_reverse_direction_on_edge_hit(self) -> None:
         """Physics should signal edge-hit but NOT reverse direction."""

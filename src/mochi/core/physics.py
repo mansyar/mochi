@@ -73,29 +73,29 @@ class Physics:
         half = sprite_width / 2.0
 
         # ── Boundary limits ────────────────────────────────────────────
-        max_x = screen_width + half  # absolute right bound
-        min_x = -half  # absolute left bound
-        edge_trigger_right = screen_width - half  # enter overshoot zone
-        edge_trigger_left = -half  # left overshoot zone
+        edge_trigger_right = screen_width - half  # max x for rightward overshoot
+        edge_trigger_left = -half  # left edge overshoot bound
 
         edge_hit = False
 
         # ── Pre-movement check: already past overshoot threshold? ──────
         if self.direction > 0 and self.x > edge_trigger_right:
             edge_hit = True
-            self.x = max_x
+            self.x = edge_trigger_right
         elif self.direction < 0 and self.x < edge_trigger_left:
             edge_hit = True
-            self.x = min_x
+            self.x = edge_trigger_left
         else:
             # ── Apply movement ─────────────────────────────────────────
             self.x += config.WALK_SPEED * dt * self.direction
 
-            # ── Clamp to absolute bounds ────────────────────────────────
-            self.x = max(min_x, min(self.x, max_x))
+            # ── Clamp so leading edge does not exceed overshoot ────────
+            self.x = max(edge_trigger_left, min(self.x, edge_trigger_right))
 
             # ── Post-movement check: crossed boundary this tick? ────────
-            if (self.direction > 0 and self.x >= max_x) or (self.direction < 0 and self.x <= min_x):
+            if (self.direction > 0 and self.x >= edge_trigger_right) or (
+                self.direction < 0 and self.x <= edge_trigger_left
+            ):
                 edge_hit = True
 
         return edge_hit
