@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QRect, Qt, QTimer
 from PySide6.QtGui import QPainter, QPixmap
 from PySide6.QtWidgets import QApplication, QWidget
 
@@ -43,9 +43,11 @@ class Canvas(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
         screen = QApplication.primaryScreen()
+        self._screen_geo: QRect | None = None
         if screen is not None:
             geo = screen.availableGeometry()
             self.setGeometry(geo)
+            self._screen_geo = geo
 
         # ── Sprite sheet loading ──────────────────────────────────────────
         self._spritesheet: SpriteSheet = SpriteSheet("sprites/")
@@ -87,9 +89,9 @@ class Canvas(QWidget):
         painter = QPainter(self)
         try:
             screen = QApplication.primaryScreen()
-            if screen is None:
+            geo = screen.availableGeometry() if screen is not None else self._screen_geo
+            if geo is None:
                 return
-            geo = screen.availableGeometry()
 
             cell_w = config.SPRITE_CELL_WIDTH  # 80 px (frame canvas width)
             cell_h = config.SPRITE_CELL_HEIGHT  # 64 px

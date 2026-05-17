@@ -49,12 +49,16 @@ def asset_path(relative: str) -> Path:
     # PyInstaller bundles data into sys._MEIPASS.
     if hasattr(sys, "_MEIPASS") and isinstance(sys._MEIPASS, str):
         _ASSETS_ROOT = Path(sys._MEIPASS, "assets")
-    # Nuitka sets __compiled__ when running compiled.
-    elif "__compiled__" in globals() or "__compiled__" in locals():
-        _ASSETS_ROOT = Path(__file__).resolve().parent.parent.parent.parent / "assets"
     else:
-        # Development mode — assume cwd is the project root.
-        _ASSETS_ROOT = Path.cwd() / "assets"
+        try:
+            # Nuitka sets __compiled__ when running compiled.
+            if __compiled__:  # type: ignore[name-defined]
+                _ASSETS_ROOT = Path(__file__).resolve().parent.parent.parent.parent / "assets"
+        except NameError:
+            pass
+        if _ASSETS_ROOT is None:
+            # Development mode — assume cwd is the project root.
+            _ASSETS_ROOT = Path.cwd() / "assets"
 
     return _ASSETS_ROOT / relative
 

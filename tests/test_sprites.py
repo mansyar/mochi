@@ -27,7 +27,7 @@ class TestSpriteSheetClass:
         """SpriteSheet should be instantiable with an asset directory."""
         from mochi.ui.sprites import SpriteSheet
 
-        sheet = SpriteSheet("assets/sprites/")
+        sheet = SpriteSheet("sprites/")
         assert isinstance(sheet, SpriteSheet)
 
 
