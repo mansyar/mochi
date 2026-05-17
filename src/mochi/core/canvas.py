@@ -36,12 +36,10 @@ class Canvas(QWidget):
         Optional parent widget.
     """
 
-    _REQUIRED_FLAGS = _CANVAS_FLAGS
-
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
-        self.setWindowFlags(self._REQUIRED_FLAGS)
+        self.setWindowFlags(_CANVAS_FLAGS)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
         screen = QApplication.primaryScreen()
