@@ -11,28 +11,26 @@
     - [x] `SCREEN_BOTTOM_MARGIN_PX: int = 48` already present in `config.py` under `# ── Screen / Canvas ───` section (from Phase 0)
     - [x] Run tests and confirm all pass
 
-### Task 1: Implement Canvas class in `src/mochi/core/canvas.py`
-- [ ] **Sub-task 1.1: Write failing tests for Canvas (Red)**
-    - [ ] Create `tests/test_canvas.py` with test class `TestCanvas`
-    - [ ] Test that Canvas is a QWidget subclass
-    - [ ] Test that Canvas has `FramelessWindowHint`, `WindowStaysOnTopHint`, and `Tool` flags set
-    - [ ] Test that `WA_TranslucentBackground` is set
-    - [ ] Test that Canvas geometry matches primary screen's `availableGeometry()` (via mock QScreen)
-    - [ ] Test that `paintEvent` draws without raising (mock QPainter — verify no errors)
-    - [ ] If test environment has a display, add a `QWidget.grab()` test that verifies the bottom-center pixel is green (`#00FF00`)
-    - [ ] Run tests and confirm they fail as expected (import errors / no Canvas class yet)
-- [ ] **Sub-task 1.2: Implement Canvas class (Green)**
-    - [ ] Create `src/mochi/core/canvas.py` with `Canvas(QWidget)` class
-    - [ ] Set window flags: `FramelessWindowHint | WindowStaysOnTopHint | Tool`
-    - [ ] Set attribute: `WA_TranslucentBackground = True`
-    - [ ] Get primary screen geometry using `QGuiScreen.primaryScreen().availableGeometry()`
-    - [ ] Set Canvas geometry to full primary screen available geometry
-    - [ ] Implement `paintEvent()` to draw a green (`#00FF00`) 64×64 rectangle:
-        - X: `(screen_width - 64) // 2` (centered horizontally)
-        - Y: `available_bottom - SCREEN_BOTTOM_MARGIN_PX - 64` (above taskbar)
-    - [ ] Run tests and confirm all pass
-    - [ ] Run `uv run ruff check src/` — zero errors
-    - [ ] Run `uv run mypy src/mochi/` — zero errors
+### Task 1: Implement Canvas class in `src/mochi/core/canvas.py` [fc57717]
+- [x] **Sub-task 1.1: Write failing tests for Canvas (Red)**
+    - [x] Create `tests/test_canvas.py` with test class `TestCanvas`
+    - [x] Test that Canvas is a QWidget subclass
+    - [x] Test that Canvas has `FramelessWindowHint`, `WindowStaysOnTopHint`, and `Tool` flags set
+    - [x] Test that `WA_TranslucentBackground` is set
+    - [x] Test that Canvas geometry matches primary screen's `availableGeometry()`
+    - [x] Test that `paintEvent` draws without raising
+    - [x] Pixel grab test added (skipped — requires display)
+    - [x] Ran tests — 7 failed as expected (ModuleNotFoundError)
+- [x] **Sub-task 1.2: Implement Canvas class (Green)**
+    - [x] Create `src/mochi/core/canvas.py` with `Canvas(QWidget)` class
+    - [x] Set window flags: `FramelessWindowHint | WindowStaysOnTopHint | Tool`
+    - [x] Set attribute: `WA_TranslucentBackground = True`
+    - [x] Get primary screen geometry using `QGuiScreen.primaryScreen().availableGeometry()`
+    - [x] Set Canvas geometry to full primary screen available geometry
+    - [x] Implement `paintEvent()` to draw a green (`#00FF00`) 64x64 rectangle
+    - [x] Run tests and confirm all pass
+    - [x] Run `uv run ruff check src/` — zero errors
+    - [x] Run `uv run mypy src/mochi/` — zero errors
 
 ### Task 2: Verify Windows click-through in `platform.py`
 - [ ] **Sub-task 2.0: This task scoped to Windows only** — macOS/Linux `set_click_through()` remains no-op stubs per ROADMAP. No new platform implementations in this track.
