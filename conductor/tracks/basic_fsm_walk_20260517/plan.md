@@ -4,22 +4,22 @@
 
 > **Goal:** Create the `FSM` class with Idle/Walk/EdgePause states and timer-based transitions, fully tested.
 
-- [ ] Task 1.1: Write FSM tests (test_fsm.py)
-    - [ ] Write test: FSM initializes in Idle state
-    - [ ] Write test: Idle→Walk transition fires within IDLE_TO_WALK_TIMER range
-    - [ ] Write test: Walk→Idle transition fires within WALK_TO_IDLE_TIMER range
-    - [ ] Write test: EdgePause→Walk transition fires within 0.5-1s range
-    - [ ] Write test: Same-state transition is a no-op (guard test)
-    - [ ] Write test: FSM logs transitions at DEBUG level
-    - [ ] Run tests: confirm they fail as expected (Red phase)
-- [ ] Task 1.2: Implement FSM class (src/mochi/core/fsm.py)
-    - [ ] Create `PetState` enum (Idle, Walk, EdgePause)
-    - [ ] Create `FSM` class with `tick(dt: float) -> None` method
-    - [ ] Implement timer logic using `IDLE_TO_WALK_TIMER` and `WALK_TO_IDLE_TIMER` from config
-    - [ ] Implement EdgePause with fixed 0.5-1s timer
-    - [ ] Add same-state transition guard (no-op on duplicate)
-    - [ ] Add DEBUG-level logging for state transitions
-    - [ ] Run tests: confirm all pass (Green phase)
+- [x] Task 1.1: Write FSM tests (test_fsm.py) `869a42b`
+    - [x] Write test: FSM initializes in Idle state
+    - [x] Write test: Idle→Walk transition fires within IDLE_TO_WALK_TIMER range
+    - [x] Write test: Walk→Idle transition fires within WALK_TO_IDLE_TIMER range
+    - [x] Write test: EdgePause→Walk transition fires within 0.5-1s range
+    - [x] Write test: Same-state transition is a no-op (guard test)
+    - [x] Write test: FSM logs transitions at DEBUG level
+    - [x] Run tests: confirm they fail as expected (Red phase)
+- [x] Task 1.2: Implement FSM class (src/mochi/core/fsm.py) `869a42b`
+    - [x] Create `PetState` enum (Idle, Walk, EdgePause)
+    - [x] Create `FSM` class with `tick(dt: float) -> None` method
+    - [x] Implement timer logic using `IDLE_TO_WALK_TIMER` and `WALK_TO_IDLE_TIMER` from config
+    - [x] Implement EdgePause with fixed 0.5-1s timer
+    - [x] Add same-state transition guard (no-op on duplicate)
+    - [x] Add DEBUG-level logging for state transitions
+    - [x] Run tests: confirm all pass (Green phase)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Core FSM Engine' (Protocol in workflow.md)
 
 ## Phase 2: Core Physics Engine
