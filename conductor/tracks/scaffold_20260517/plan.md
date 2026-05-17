@@ -70,15 +70,15 @@
     - [x] Test that `set_click_through()` accepts a QWidget and bool without raising
 - [x] Run tests and confirm they fail — **Red Phase**
 
-### Task 0.8: Implement platform.py stubs
-- [ ] Create `src/mochi/utils/platform.py`:
-    - [ ] Implement `get_platform() -> str` returning sys.platform
-    - [ ] Implement `get_data_dir() -> Path` resolving OS-appropriate data directory with fallback (`%APPDATA%/Mochi`, `~/Library/Application Support/Mochi`, or `~/.local/share/mochi`), creating it via `mkdir(parents=True, exist_ok=True)` on first call
-    - [ ] Implement `is_alt_held() -> bool` returning False as default stub
-    - [ ] Implement `set_click_through(window: "QWidget", enabled: bool) -> None` with platform-specific branching (win32 stub with ctypes placeholder for `WS_EX_TRANSPARENT`, darwin/linux no-op stubs). Use string annotation to avoid forward-import issues
-- [ ] Run tests and confirm they pass — **Green Phase**
-- [ ] Run `uv run ruff check src/` — zero lint errors
-- [ ] Run `uv run mypy src/mochi/` — zero type errors
+### Task 0.8: Implement platform.py stubs `99bfbc2`
+- [x] Create `src/mochi/utils/platform.py`:
+    - [x] Implement `get_platform() -> str` returning sys.platform
+    - [x] Implement `get_data_dir() -> Path` resolving OS-appropriate data directory with fallback (`%APPDATA%/Mochi`, `~/Library/Application Support/Mochi`, or `~/.local/share/mochi`), creating it via `mkdir(parents=True, exist_ok=True)` on first call
+    - [x] Implement `is_alt_held() -> bool` returning False as default stub
+    - [x] Implement `set_click_through(window: "QWidget", enabled: bool) -> None` with platform-specific branching (win32 stub with ctypes placeholder for `WS_EX_TRANSPARENT`, darwin/linux no-op stubs). Used `from __future__ import annotations` + TYPE_CHECKING to avoid forward-import issues
+- [x] Run tests and confirm they pass — **Green Phase**
+- [x] Run `uv run ruff check src/` — zero lint errors
+- [x] Run `uv run mypy src/mochi/` — zero type errors (pending main.py)
 
 ### Task 0.9: Write tests for main.py and __main__.py
 - [ ] Write `tests/test_main.py`:
