@@ -23,7 +23,7 @@
 
 **Goal:** Implement gravity acceleration, terminal velocity capping, landing detection, and surface-loss detection in the Physics engine. Physics.update() return type changes from `bool` to `PhysicsResult`.
 
-- [ ] Task: Write PhysicsResult dataclass
+- [~] Task: Write PhysicsResult dataclass
     - [ ] `physics.py`: Define `PhysicsResult` dataclass with `edge_hit: bool = False`, `surface_lost: bool = False`, `landed: bool = False`
     - [ ] Re-export `PhysicsResult` from `mochi.core.__init__`
 

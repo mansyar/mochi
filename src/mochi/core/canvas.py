@@ -187,10 +187,10 @@ class Canvas(QWidget):
         # (see ``paintEvent``), so no position adjustment is needed on flip.
         self._physics.direction = self._fsm.direction
 
-        # 3. Update physics (horizontal movement)
+        # 3. Update physics (horizontal movement, gravity, landing)
         geo = self._screen_geo
         screen_width = geo.width() if geo is not None else 1920
-        edge_hit = self._physics.update(
+        result = self._physics.update(
             dt,
             current_state,
             screen_width=screen_width,
@@ -198,7 +198,7 @@ class Canvas(QWidget):
         )
 
         # 4. Handle edge-hit: transition to EdgePause
-        if edge_hit and current_state is PetState.Walk:
+        if result.edge_hit and current_state is PetState.Walk:
             self._fsm.transition_to(PetState.EdgePause)
 
         # 5. Determine sprite key from state

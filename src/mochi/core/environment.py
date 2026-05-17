@@ -149,7 +149,7 @@ class EnvironmentPoller(QThread):
             )
 
         # ── Screen edge surfaces ───────────────────────────────────────
-        bottom_y = s.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - config.SPRITE_CELL_HEIGHT
+        bottom_y = s.bottom() - config.SCREEN_BOTTOM_MARGIN_PX
         surfaces.append(
             Surface(
                 rect=QRect(0, bottom_y, s.width(), 0),

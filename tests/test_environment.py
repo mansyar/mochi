@@ -258,7 +258,7 @@ class TestSurfaceListBuilder:
         surfaces = poller._build_surfaces([])
         bottoms = [s for s in surfaces if s.surface_type == "screen_bottom"]
         assert len(bottoms) == 1
-        expected_y = geo.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - config.SPRITE_CELL_HEIGHT
+        expected_y = geo.bottom() - config.SCREEN_BOTTOM_MARGIN_PX
         assert bottoms[0].rect == QRect(0, expected_y, 1920, 0)
 
     def test_screen_left_surface(self) -> None:
