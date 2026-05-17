@@ -7,8 +7,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PySide6.QtCore import QRect, QTimer
 
-from mochi import config
-
 
 class TestCanvasAnimationTimer:
     """Test that Canvas creates and configures the animation timer."""
@@ -23,14 +21,15 @@ class TestCanvasAnimationTimer:
         assert hasattr(canvas, "_animation_timer")
         assert isinstance(canvas._animation_timer, QTimer)
 
-    def test_animation_timer_interval_from_config(self, qtbot: object) -> None:
-        """Animation timer interval should equal ANIMATION_TICK_MS from config."""
+    def test_animation_timer_interval_starts_at_idle_rate(self, qtbot: object) -> None:
+        """Animation timer interval should start at 250ms (Idle rate), not ANIMATION_TICK_MS."""
         from mochi.core.canvas import Canvas
 
         canvas = Canvas()
         qtbot.addWidget(canvas)  # type: ignore[attr-defined]
 
-        assert canvas._animation_timer.interval() == config.ANIMATION_TICK_MS
+        # Canvas now uses adaptive tick rate: Idle = 250ms
+        assert canvas._animation_timer.interval() == 250
 
     def test_animation_timer_is_active_on_construction(self, qtbot: object) -> None:
         """Animation timer should be running after Canvas construction."""
@@ -62,7 +61,7 @@ class TestCanvasFrameAdvancement:
         qtbot.addWidget(canvas)  # type: ignore[attr-defined]
 
         # Count initial frames for wrap-around
-        frame_count = len(canvas._idle_frames)
+        frame_count = len(canvas._animations["idle"])
         initial = canvas._current_frame
         canvas._advance_frame()
         expected = (initial + 1) % frame_count if frame_count > 0 else 0
@@ -75,7 +74,7 @@ class TestCanvasFrameAdvancement:
         canvas = Canvas()
         qtbot.addWidget(canvas)  # type: ignore[attr-defined]
 
-        frame_count = len(canvas._idle_frames)
+        frame_count = len(canvas._animations["idle"])
         if frame_count == 0:
             pytest.skip("No idle frames loaded")
 
@@ -121,10 +120,11 @@ class TestCanvasSpriteRendering:
         canvas = Canvas()
         qtbot.addWidget(canvas)  # type: ignore[attr-defined]
 
-        assert hasattr(canvas, "_idle_frames")
-        assert isinstance(canvas._idle_frames, list)
+        assert hasattr(canvas, "_animations")
+        assert "idle" in canvas._animations
+        assert isinstance(canvas._animations["idle"], list)
         # At minimum we should have the frames loaded
-        assert len(canvas._idle_frames) > 0
+        assert len(canvas._animations["idle"]) > 0
 
 
 class TestGreenRectObsolete:
@@ -140,3 +140,33 @@ class TestGreenRectObsolete:
         assert "#00FF00" not in source or "green" not in source, (
             "Green rectangle #00FF00 should be removed from canvas.py"
         )
+
+
+class TestCanvasAdaptiveTickRate:
+    """Test that Canvas adjusts the animation timer interval per FSM state."""
+
+    def test_timer_interval_changes_on_fsm_transition(self, qtbot: object) -> None:
+        """Canvas timer interval should change when FSM state transitions."""
+        from mochi.core.canvas import Canvas
+        from mochi.core.fsm import PetState
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+
+        # Should start at Idle rate (250ms)
+        assert canvas._animation_timer.interval() == 250
+
+        # Transition to Walk → should change to 100ms
+        canvas._fsm.transition_to(PetState.Walk)
+        canvas._advance_frame()
+        assert canvas._animation_timer.interval() == 100, "Timer should be 100ms in Walk state"
+
+        # Transition to EdgePause → should change to 250ms
+        canvas._fsm.transition_to(PetState.EdgePause)
+        canvas._advance_frame()
+        assert canvas._animation_timer.interval() == 250, "Timer should be 250ms in EdgePause state"
+
+        # Back to Idle → still 250ms
+        canvas._fsm.transition_to(PetState.Idle)
+        canvas._advance_frame()
+        assert canvas._animation_timer.interval() == 250, "Timer should be 250ms in Idle state"

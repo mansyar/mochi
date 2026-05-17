@@ -2,13 +2,13 @@
 
 ## Desktop Cat Pet — "Mochi"
 
-**Last Updated:** 2026-05-17 (Phase 1, Track 1.2 completed)
+**Last Updated:** 2026-05-17 (Phase 1, Track 1.3 completed)
 
 Each phase builds on the previous one. Each track within a phase is a **vertical slice** — it touches all layers needed (model, core, UI, tests) to deliver one testable, demoable behavior.
 
 ---
 
-## ✅ Phase 0: Project Foundation (COMPLETED)
+## ✅ Phase 0: Project Foundation ✅
 
 > **Goal:** A runnable Python project with dev tooling. No visible output yet.
 
@@ -39,9 +39,11 @@ Each phase builds on the previous one. Each track within a phase is a **vertical
 
 ---
 
-## Phase 1: Cat On Screen
+## ✅ Phase 1: Cat On Screen ✅
 
 > **Goal:** A visible, animated cat sprite on a transparent overlay. Walks on the screen bottom. No window awareness yet.
+>
+> **Status:** All 3 tracks complete — the transparent overlay renders the cat with idle breathing animation and autonomous screen-bottom walking with direction-aware sprite flipping and edge reversal.
 
 ### Track 1.1 — Transparent Overlay Window ✅
 
@@ -88,28 +90,34 @@ Each phase builds on the previous one. Each track within a phase is a **vertical
 - [x] `uv run mypy src/mochi/` — zero type errors
 - [x] User confirmed and reviewed — see `conductor/archive/sprite_idle_20260517/`
 
-### Track 1.3 — Basic FSM + Walk on Screen Bottom
+### Track 1.3 — Basic FSM + Walk on Screen Bottom ✅
 
 **Modules:** `fsm.py`, `physics.py`, `canvas.py`
 
-| Task | Detail |
-|---|---|
-| Implement `FSM` class | State enum (Idle, Walk), `tick()` method, random timer for Idle→Walk and Walk→Idle |
-| Implement horizontal movement | `physics.py`: apply `WALK_SPEED * dt` to X position each tick |
-| Screen boundary clamping | Reverse walk direction at screen left/right edges |
-| Walk animation | Switch sprite key from `idle` to `walk_left`/`walk_right` based on direction |
-| Wire FSM into canvas tick | Canvas timer calls `fsm.tick()` → `physics.update()` → `canvas.update()` |
+| Task | Status | Detail |
+|---|---|---|
+| Implement `FSM` class | ✅ Complete | `PetState` (Idle, Walk, EdgePause), `tick(dt)` method, random timers from config, same-state no-op guard, DEBUG-level logging |
+| Implement `Physics` class | ✅ Complete | `x`/`y` position, `direction` (+1/-1), `update(dt, state, screen_width, sprite_width, surfaces=None)` — frame-rate-independent movement at `WALK_SPEED * dt`, pre/post edge detection with half-sprite overshoot |
+| EdgePause state | ✅ Complete | Cat pauses 0.5–1s at screen edge, then reverses direction and continues walking |
+| Walk animation | ✅ Complete | Loads `WALK.png` frames alongside idle, switches sprite key per state, flips via `QPainter.scale(-1, 1)` when walking right (sprites face left by default) |
+| Adaptive tick rate | ✅ Complete | 100ms during Walk (10 FPS), 250ms during Idle/EdgePause (4 FPS), adjusted on each FSM transition |
+| Wire FSM into canvas tick | ✅ Complete | `fsm.tick(dt)` → sync direction → `physics.update(dt, ...)` → edge detect → swap sprite key → advance frame → adjust timer → repaint |
+| Expose FSM/Physics | ✅ Complete | Re-exported through `src/mochi/core/__init__.py` |
 
 **Tests:**
-- `test_fsm.py`: Idle→Walk transition fires within timer range. Walk→Idle fires. No invalid states.
-- `test_physics.py`: Horizontal movement applies correctly. Screen bounds clamp position.
-- Run: `uv run pytest tests/test_fsm.py tests/test_physics.py`
+- `test_fsm.py`: 15 tests — Idle→Walk/Walk→Idle transition timer ranges, EdgePause→Walk, same-state no-op, direction reversal on EdgePause exit, DEBUG logging
+- `test_physics.py`: 21 tests — horizontal displacement, left/right edge detection, half-sprite overshoot, direction-aware edge signalling (no reversal by physics), position clamping, API surface
+- `test_animation.py`: Updated for new Canvas API, 1 new adaptive tick rate test
+- Run: `uv run pytest` — all 116 tests pass
 
-**Definition of Done:**
-- [ ] Cat idles for a few seconds, walks left/right, stops, idles again — in a loop
-- [ ] Cat reverses direction at screen edges
-- [ ] `uv run pytest` — all unit tests pass
-- [ ] `uv run ruff check src/` — zero lint errors on new code
+**Results:**
+- [x] Cat idles for 2–5s, walks left/right at 60px/s, pauses 0.5–1s at edges, reverses direction — in a loop
+- [x] Walk sprite flipped for rightward movement; idle sprite respects last movement direction
+- [x] `uv run pytest` — **116 passed, 1 skipped, 94% coverage**
+- [x] `uv run ruff check src/` — zero lint errors
+- [x] `uv run ruff format --check src/` — zero formatting violations
+- [x] `uv run mypy src/mochi/` — zero type errors
+- [x] Review completed and archived (see `conductor/archive/basic_fsm_walk_20260517/`)
 
 ---
 
