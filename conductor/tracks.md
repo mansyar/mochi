@@ -16,5 +16,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Track 1.2 — Sprite Loading & Idle Animation**
-  *Link: [./tracks/sprite_idle_20260517/](./tracks/sprite_idle_20260517/)*
+- ~~[x] **Track: Track 1.2 — Sprite Loading & Idle Animation**~~
+  ~~*Link: [./archive/sprite_idle_20260517/](./archive/sprite_idle_20260517/)*~~
