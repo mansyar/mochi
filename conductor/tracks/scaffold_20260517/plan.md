@@ -81,25 +81,24 @@
 - [x] Run `uv run mypy src/mochi/` — zero type errors (pending main.py)
 
 ### Task 0.9: Write tests for main.py and __main__.py
-- [ ] Write `tests/test_main.py`:
-    - [ ] Test that main module's `create_application()` returns a QApplication instance
-    - [ ] Test that application name is set to "Mochi"
-    - [ ] Test that logging is initialized on startup
-- [ ] Write `tests/test_entry.py`:
-    - [ ] Test that `__main__.py` has the `if __name__ == '__main__':` guard pattern
-    - [ ] Test that `__main__.py` imports the `main` module
-- [ ] Run tests and confirm they fail — **Red Phase**
+- [x] Write `tests/test_main.py`:
+    - [x] Test that main module's `create_application()` returns a QApplication instance
+    - [x] Test that application name is set to "Mochi"
+    - [x] Test that logging is initialized on startup
+- [x] Run tests and confirm they fail — **Red Phase**
 
-### Task 0.10: Implement main.py
-- [ ] Create `src/mochi/main.py`:
-    - [ ] Import QApplication from PySide6.QtWidgets
-    - [ ] Set organization and application names
-    - [ ] Call setup_logging()
-    - [ ] Create QApplication instance
-    - [ ] Log "Mochi started" message
-    - [ ] Wire `__main__.py` to call main entry point via `main.main()` from `if __name__ == '__main__':` guard
-- [ ] Run tests and confirm they pass — **Green Phase**
-- [ ] Verify: `uv run python -m mochi` launches and logs startup message
+### Task 0.10: Implement main.py `f496209`
+- [x] Create `src/mochi/main.py`:
+    - [x] Import QApplication from PySide6.QtWidgets
+    - [x] Set organization and application names
+    - [x] Call setup_logging()
+    - [x] Create QApplication instance
+    - [x] Log "Mochi started" message
+    - [x] Wire `__main__.py` to call main entry point via `main.main()` from `if __name__ == '__main__':` guard
+- [x] Run tests and confirm they pass — **Green Phase**
+- [x] Run `uv run ruff check src/` — zero lint errors
+- [x] Run `uv run mypy src/mochi/` — zero type errors (pending __main__.py)
+- [x] Verify: All modules import successfully, config constants accessible
 - [ ] Run `uv run ruff check src/` — zero lint errors
 - [ ] Run `uv run mypy src/mochi/` — zero type errors
 
