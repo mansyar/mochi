@@ -4,9 +4,9 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Phase 1, Track 1.2 Complete — Active Development
+**Status:** Phase 1, Track 1.3 Complete — Active Development
 
-> **Project Status:** Phase 0 (Project Foundation) is complete. **Track 1.1 (Transparent Overlay Window)** and **Track 1.2 (Sprite Loading & Idle Animation)** are complete — the transparent overlay renders the cat sprite with a looping idle breathing animation (8 frames at 200ms intervals, auto-centered frames). The green test rectangle has been removed. 79 tests passing with 93% coverage, zero lint/type errors. See `ROADMAP.md` for the full development plan.
+> **Project Status:** Phase 0 (Project Foundation) is complete. **Tracks 1.1, 1.2, and 1.3** are complete — the transparent overlay renders the cat sprite with a looping idle breathing animation (8 frames at 250ms intervals, auto-centered frames). The cat autonomously walks left and right along the screen bottom using an FSM-driven Idle→Walk→EdgePause cycle, reversing direction at screen edges with a brief pause. The walk animation uses direction-aware sprite flipping via `QPainter.scale(-1, 1)` and an adaptive tick rate (100ms during Walk, 250ms during Idle). The green test rectangle has been removed. 116 tests passing with 94% coverage, zero lint/type errors. See `ROADMAP.md` for the full development plan.
 
 ---
 

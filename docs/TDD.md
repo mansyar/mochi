@@ -4,7 +4,7 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Phase 1, Track 1.2 Complete — Active Development
+**Status:** Phase 1, Track 1.3 Complete — Active Development
 
 ---
 
@@ -128,8 +128,9 @@ mochi/
 │       │   └── fsm.py            # (planned) Finite State Machine engine
 │       ├── core/
 │       │   ├── __init__.py
-│       │   ├── canvas.py          # Main transparent overlay window + sprite rendering
-│       │   ├── physics.py         # (planned) Gravity, collision detection, movement
+│       │   ├── canvas.py          # Main transparent overlay window + sprite rendering ✅
+│       │   ├── fsm.py             # FSM engine: Idle, Walk, EdgePause states ✅
+│       │   ├── physics.py         # Horizontal movement, screen-boundary detection ✅
 │       │   ├── environment.py     # (planned) PyWinCtl polling, window geometry cache
 │       │   └── input_bridge.py    # (planned) Platform-native global hotkey bridge
 │       ├── ui/
@@ -167,10 +168,10 @@ mochi/
 |---|---|---|
 | `main.py` | Bootstrap QApplication, wire all components, start event loop | All modules |
 | `config.py` | Expose all tunable constants as module-level variables | None |
-| `fsm.py` | State transitions, timer management, behavior decisions | `config`, `pet_state` |
+| `fsm.py` | State transitions, timer management, behavior decisions | `config` |
 | `pet_state.py` | Metric CRUD, offline decay calculation, JSON read/write | `config` |
-| `canvas.py` | Frameless overlay window, paint loop, sprite rendering | `sprites`, `fsm`, `physics` |
-| `physics.py` | Gravity, velocity, collision detection against surfaces | `config`, `environment` |
+| `canvas.py` | Frameless overlay window, paint loop, sprite rendering, FSM+Physics wire-up | `sprites`, `fsm`, `physics` |
+| `physics.py` | Horizontal movement, screen-boundary detection, frame-rate-independent update | `config` |
 | `environment.py` | PyWinCtl polling thread, PyMonCtl monitor geometry, window rect cache, fullscreen detection | `config` |
 | `input_bridge.py` | Platform-native hotkey registration → Qt signal emission | `platform` (for OS detection) |
 | `toolbox.py` | Inventory UI widget, item deployment | `pet_state`, `config` |
@@ -414,20 +415,25 @@ The rendering container is a borderless, always-on-top, transparent Qt window sp
 | **Geometry** | Full primary screen dimensions |
 | **Click-Through** | Enabled by default (see §5.2) |
 
-The canvas runs a `QTimer` with an **adaptive tick rate** based on the current FSM state:
+The canvas runs a `QTimer` with an **adaptive tick rate** based on the current FSM state (Track 1.3 implements Walk and Idle; other states deferred to subsequent tracks):
 
 | State | Tick Interval | Rationale |
 |---|---|---|
-| Walk, Climb, Fall, Grabbed, Wall Slide | 100ms (10 FPS) | Active motion requires smooth animation |
+| Walk | 100ms (10 FPS) | Smooth movement animation |
 | Idle (Loaf) | 250ms (4 FPS) | Subtle breathing animation, low CPU |
-| Sleep | 500ms (2 FPS) | Minimal breathing animation, lowest CPU |
-| Boss-Key hidden | Timer stopped | Zero CPU. Timer resumes on restore |
+| EdgePause | 250ms (4 FPS) | Minimal CPU during brief pause; uses walk sprite |
+| *(planned)* Sleep | 500ms (2 FPS) | Minimal breathing animation, lowest CPU |
 
 Each tick:
-1. Ticks the FSM (evaluate transitions).
-2. Ticks the physics engine (apply gravity/velocity, detect collisions).
-3. Advances the animation frame index.
-4. Calls `update()` to trigger `paintEvent()`.
+1. Computes `dt = time.monotonic() - last_tick_time` for frame-rate-independent physics.
+2. Ticks the FSM (`fsm.tick(dt)`) — evaluates timer-based state transitions.
+3. Syncs physics direction from FSM (`physics.direction = fsm.direction`).
+4. Ticks the physics engine (`physics.update(dt, state, ...)`) — applies horizontal movement and detects screen-edge hits.
+5. If edge-hit detected: transitions FSM to EdgePause state (0.5–1s timer, then reverses direction).
+6. Determines sprite key from current state (`idle` or `walk`), swaps animation set if changed, resets frame index.
+7. Advances the animation frame index.
+8. Adapts the timer interval to the current state (100ms Walk, 250ms Idle/EdgePause).
+9. Calls `update()` to trigger `paintEvent()`.
 
 The timer interval is updated whenever the FSM transitions to a new state.
 
@@ -504,7 +510,9 @@ idle_frames: list[QPixmap] = sheet.load("idle")  # 8 frames
 - **Auto-centering:** Each frame's content is detected and re-centered within the 80×64 canvas to 1px tolerance. This prevents the "sliding" effect caused by unbalanced frame content (e.g., tail flick shifting the visual center of mass).
 - **Graceful handling:** Missing PNG files log a warning and return an empty list. `get_frames()` always returns a list (possibly empty) — never raises `KeyError`.
 
-**Frame advancement:** A `QTimer` fires every `ANIMATION_TICK_MS` (200ms, configurable). Each tick calls `_advance_frame()` which increments `_current_frame` modulo `len(_idle_frames)`, then calls `update()` to trigger `paintEvent`.
+**Frame advancement:** A `QTimer` fires at a state-adaptive interval (100ms Walk, 250ms Idle). Each tick calls `_advance_frame()` which computes `dt`, ticks the FSM, updates physics, detects edge hits, swaps sprite keys if the state changed, increments `_current_frame` modulo `len(frames)`, adjusts the timer interval, and calls `update()` to trigger `paintEvent`.
+
+**Direction-aware sprite rendering:** The `paintEvent()` renders the current sprite frame at `(physics.x, physics.y)`. When the cat is facing right (`direction == 1`), all sprites are flipped horizontally via `QPainter.scale(-1, 1)` since the sprite sheets face left by default. This provides a single sprite sheet per animation without needing separate left/right assets.
 
 ### 5.4 Physics & Collision (`physics.py`)
 
@@ -688,8 +696,8 @@ Run with `uv run pytest`. Coverage reported via `pytest-cov`.
 | `test_canvas.py` | Canvas is QWidget subclass, correct window flags, translucent background, geometry matches primary screen, paintEvent doesn't raise | ✅ 6 tests |
 | `test_sprites.py` | SpriteSheet class, 8-frame idle loading at 80x64 per frame, centering tolerance, error handling for missing/invalid files, multi-word keys | ✅ 11 tests |
 | `test_animation.py` | QTimer creation and interval, frame index advancement and wrap-around, drawPixmap called in paintEvent, green rect removal | ✅ 10 tests |
-| `test_fsm.py` | (Planned) All state transitions fire correctly given triggers. Timer boundaries work | 📋 Planned |
-| `test_physics.py` | (Planned) Gravity acceleration, terminal velocity capping, collision detection against mock surfaces | 📋 Planned |
+| `test_fsm.py` | PetState enum, FSM class, Idle→Walk and Walk→Idle timer transitions, EdgePause reversal, same-state no-op, DEBUG logging | ✅ 15 tests |
+| `test_physics.py` | Horizontal movement at WALK_SPEED, screen-boundary detection (left/right), half-sprite overshoot, direction-aware edge signalling, position clamping, API forward-compatibility | ✅ 21 tests |
 | `test_pet_state.py` | (Planned) Metric decay calculation, JSON round-trip, corruption recovery, boundary clamping (0–100) | 📋 Planned |
 
 ### 8.2 Integration Tests (pytest-qt)
@@ -709,7 +717,9 @@ def test_window_flags_set(qtbot):
 - **Main integration (implemented):** `test_main.py` — Canvas instantiation, `.show()` call, dimension logging, timer-based click-through setup.
 - **Click-through (implemented):** `test_platform.py` — Windows enable/disable via win32 helper, macOS/Linux no-op paths.
 - **Sprite loading (implemented):** `test_sprites.py` — Sheet slicing produces correct frame count and dimensions, auto-centering verified within 2px tolerance, error paths for missing/invalid files.
-- **Animation timer (implemented):** `test_animation.py` — QTimer created at correct interval, frame index advances and wraps, paintEvent uses drawPixmap instead of fillRect.
+- **Animation timer (implemented):** `test_animation.py` — QTimer created at correct interval, frame index advances and wraps, paintEvent uses drawPixmap instead of fillRect, adaptive tick rate verified per FSM state transition.
+- **FSM (implemented):** `test_fsm.py` — 15 tests covering Idle→Walk/Walk→Idle timer transitions, EdgePause reversal, same-state no-op, and DEBUG-level logging.
+- **Physics (implemented):** `test_physics.py` — 21 tests covering horizontal movement, screen-boundary detection with half-sprite overshoot, direction-aware edge signalling, and forward-compatible API surface.
 - **Hotkey bridge (planned):** Verify `InputBridge.register()` succeeds on each platform.
 - **Signal flow (planned):** Verify `EnvironmentPoller` → `platforms_updated` signal.
 
