@@ -131,12 +131,12 @@ class Canvas(QWidget):
         """Start the environment poller when the canvas is first shown."""
         if self._poller is not None and not self._poller.isRunning():
             self._poller.start()
-        super().showEvent(event)  # type: ignore[misc]
+        super().showEvent(event)  # type: ignore[arg-type]
 
     def closeEvent(self, event: object) -> None:  # noqa: N802
         """Clean up the poller thread on window close."""
         self._stop_poller()
-        super().closeEvent(event)  # type: ignore[misc]
+        super().closeEvent(event)  # type: ignore[arg-type]
 
     def _stop_poller(self) -> None:
         """Safely stop and clean up the environment poller thread."""

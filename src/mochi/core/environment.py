@@ -118,8 +118,13 @@ class EnvironmentPoller(QThread):
             y = getattr(w, "top", 0) or 0
             ww = getattr(w, "width", 0) or 0
             wh = getattr(w, "height", 0) or 0
-            handle = getattr(w, "getHandle", None)
-            wid: int | None = int(handle()) if callable(handle) else None  # type: ignore[arg-type]
+            get_handle = getattr(w, "getHandle", None)
+            wid: int | None
+            if callable(get_handle):
+                raw = get_handle()
+                wid = None if raw is None else int(raw)
+            else:
+                wid = None
 
             surfaces.append(
                 Surface(
