@@ -19,7 +19,7 @@
 
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [48e4459]
 
-## Phase 2: Physics — Gravity, Landing, and Surface-Loss Detection
+## Phase 2: Physics — Gravity, Landing, and Surface-Loss Detection [checkpoint: 47013ca]
 
 **Goal:** Implement gravity acceleration, terminal velocity capping, landing detection, and surface-loss detection in the Physics engine. Physics.update() return type changes from `bool` to `PhysicsResult`.
 
@@ -66,7 +66,7 @@
     - [x] `environment.py`: Changed to actual ground line (without SPRITE_CELL_HEIGHT)
     - [x] `test_environment.py`: Updated expected Y to match new formula
 
-- [~] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [47013ca]
 
 ## Phase 3: Canvas — Wire Fall into Animation Loop
 
