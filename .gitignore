@@ -1,0 +1,66 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+*.spec
+
+# === Virtual Environment ===
+.venv/
+venv/
+env/
+
+# === uv ===
+# Keep uv.lock tracked (deterministic builds)
+# Only ignore the cache
+.uv_cache/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# === Testing & Coverage ===
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# === Ruff ===
+.ruff_cache/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# === Packaging ===
+*.exe
+*.app
+*.dmg
+*.AppImage
+Mochi.exe
+Mochi.app/
+
+# === Application Runtime ===
+mochi.log
+pet_state.json
+pet_state.json.bak
+
+# === PyInstaller ===
+*.manifest
+*.spec
+
+# === Nuitka ===
+*.build/
+*.dist/
+*.onefile-build/
