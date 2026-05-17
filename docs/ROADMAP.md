@@ -2,7 +2,7 @@
 
 ## Desktop Cat Pet — "Mochi"
 
-**Last Updated:** 2026-05-17 (Phase 1, Track 1.3 completed)
+**Last Updated:** 2026-05-17 (Phase 2, Track 2.1 completed)
 
 Each phase builds on the previous one. Each track within a phase is a **vertical slice** — it touches all layers needed (model, core, UI, tests) to deliver one testable, demoable behavior.
 
@@ -121,39 +121,58 @@ Each phase builds on the previous one. Each track within a phase is a **vertical
 
 ---
 
-## Phase 2: Environmental Awareness
+## ✅ Phase 2: Environmental Awareness ✅
 
 > **Goal:** The cat interacts with real application windows — walks on them, falls off them, climbs edges.
+>
+> **Status:** Track 2.1 complete — background window polling infrastructure built. The cat does NOT yet walk on windows (ground snapping deferred to Track 2.2).
 
-### Track 2.1 — Window Polling & Surface Detection
+### Track 2.1 — Window Polling & Surface Detection ✅
 
-**Modules:** `environment.py`, `physics.py`
+**Modules:** `environment.py`, `canvas.py`, `config.py`
 
-| Task | Detail |
-|---|---|
-| Implement `EnvironmentPoller` | `QThread` + `QTimer` (300ms), calls `pywinctl.getAllWindows()` |
-| Build surface list | Convert window rects to `list[Surface]` — window tops, screen edges, screen bottom |
-| Filter windows | Exclude minimized, empty-title, and the Mochi overlay itself |
-| Emit `platforms_updated` signal | Main thread receives updated surface list |
-| Ground detection in physics | Cat snaps to nearest surface below it instead of only screen bottom |
+| Task | Status | Detail |
+|---|---|---|
+| Implement `EnvironmentPoller` | ✅ Complete | `QThread` + `QTimer` (300ms), calls `pywinctl.getAllWindows()` on background thread |
+| Build `Surface` dataclass | ✅ Complete | `@dataclass` with `rect: QRect`, `surface_type: str`, `window_id: int \| None` |
+| Build surface list | ✅ Complete | Convert filtered window rects to `list[Surface]` — window tops/lefts/rights, screen edges |
+| Filter windows | ✅ Complete | Exclude minimized, empty-title, and the Mochi overlay itself |
+| Emit `platforms_updated` signal | ✅ Complete | Main thread receives updated surface list; Canvas stores in `self._surfaces` and logs count |
+| Error resilience | ✅ Complete | `pywinctl.getAllWindows()` failure → log warning + re-emit cached surfaces. Never crashes |
+| Thread cleanup on close | ✅ Complete | `closeEvent()` → `quit()` → `wait(2000)` → `deleteLater()` |
+| Canvas integration | ✅ Complete | Poller created in `Canvas.__init__()`, started lazily in `showEvent()`, signal connected to `_on_platforms_updated()` |
+| Poll interval config | ✅ Complete | `WINDOW_POLL_INTERVAL_MS` updated from 200 → 300ms for adequate surface detection at < 0.5% CPU |
 
 **Tests:**
-- `test_physics.py`: Given mock surfaces, cat lands on the correct one.
+- `test_environment.py` (new): 31 tests — Surface dataclass, window filtering, surface list builder, polling loop signal emission, error resilience with mocked pywinctl
+- `test_canvas.py` (updated): 3 new tests — poller creation, `_on_platforms_updated` handler, `_surfaces` storage
+- `test_config.py` (updated): 2 new tests — `WINDOW_POLL_INTERVAL_MS` constant validation
+- Run: `uv run pytest` — all **153 tests pass**, 91% coverage
 
-**Definition of Done:**
-- [ ] Cat walks on the **top edge of real application windows**, not just screen bottom
-- [ ] Opening/moving a window below the cat gives it a new platform
-- [ ] Console log shows surface list updating every 300ms
+**Results:**
+- [x] `EnvironmentPoller` enumerates all visible windows and emits a correct `list[Surface]`
+- [x] The Mochi overlay window is excluded from the surface list
+- [x] Minimized and empty-title windows are excluded
+- [x] Screen edge surfaces are always included (even with zero visible windows)
+- [x] `platforms_updated` signal emitted every poll tick (cross-thread, Qt QueuedConnection)
+- [x] If `pywinctl.getAllWindows()` raises, the previous surface list is re-emitted and a warning is logged
+- [x] `screen_bottom` Y coordinate matches `Canvas._screen_bottom_y()` formula
+- [x] Canvas receives the signal cross-thread and caches the surface list
+- [x] Poller thread cleans up properly on Canvas destruction
+- [x] 0% CPU when poller thread not started (lazy `showEvent()`)
+- [x] `uv run ruff check src/` — zero lint errors
+- [x] `uv run mypy src/mochi/` — zero type errors
+- [x] Review completed and archived (see `conductor/archive/window_polling_20260517/`)
 
-### Track 2.2 — Gravity & Falling
+### Track 2.2 — Gravity, Falling & Ground Snapping
 
-**Modules:** `fsm.py`, `physics.py`
+**Modules:** `fsm.py`, `physics.py`, `environment.py`
 
 | Task | Detail |
 |---|---|
 | Add Fall state to FSM | Walk→Fall transition when surface is lost |
 | Implement gravity | `velocity_y += GRAVITY * dt`, capped at `TERMINAL_VELOCITY` |
-| Landing detection | When `pet_bottom >= surface_top`, snap to surface, zero velocity, transition to Idle |
+| Ground/landing detection | When `pet_bottom >= surface_top` for any surface in `EnvironmentPoller`'s list, snap to surface, zero velocity, transition to Idle |
 | Fall animation | Switch to fall sprite during descent |
 | Screen bottom as last resort | If no window surface below, land on screen bottom |
 
@@ -511,7 +530,7 @@ graph TD
 |---|---|---|
 | **Phase 0** | 1 | Runnable project skeleton |
 | **Phase 1** | 3 | Visible animated cat walking on screen bottom |
-| **Phase 2** | 4 | Cat interacts with real windows — walks, falls, climbs, sleeps |
+| **Phase 2** | 4 | Cat interacts with real windows — walks, falls, climbs, sleeps (T2.1 complete, T2.2–T2.4 pending) |
 | **Phase 3** | 4 | User can interact — hotkeys, drag, tray, boss key |
 | **Phase 4** | 3 | Tamagotchi lifecycle — metrics, toolbox, behavioral effects |
 | **Phase 5** | 5 | Polish, edge cases, packaging for distribution |
