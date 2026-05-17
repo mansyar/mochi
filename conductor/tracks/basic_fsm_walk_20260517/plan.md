@@ -22,7 +22,7 @@
     - [x] Run tests: confirm all pass (Green phase)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Core FSM Engine' (Protocol in workflow.md) `c367b0d`
 
-## Phase 2: Core Physics Engine
+## Phase 2: Core Physics Engine [checkpoint: 53c076b]
 
 > **Goal:** Create the `Physics` class with horizontal movement and screen boundary clamping, fully tested.
 
@@ -43,7 +43,7 @@
     - [x] **Return bool**: `True` if edge was hit (canvas handles pause/direction reversal), `False` otherwise. Physics does NOT reverse direction — that's the FSM's job.
     - [x] API includes `surfaces=None` parameter for forward-compatibility with Phase 2 window awareness
     - [x] Run tests: confirm all pass (Green phase)
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Core Physics Engine' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Physics Engine' (Protocol in workflow.md) `53c076b`
 
 ## Phase 3: Canvas Integration & Walk Animation
 
