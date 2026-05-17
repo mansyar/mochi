@@ -95,3 +95,55 @@ class TestCanvasWidget:
         center_pixel = pixmap.toImage().pixelColor(32, 32)
 
         assert center_pixel.name() == "#00ff00"
+
+
+class TestCanvasSpritePosition:
+    """Verify that ``x`` is always the sprite's left edge regardless of
+    direction — the fix lives in ``paintEvent``, so no x adjustment
+    should happen on direction flips."""
+
+    def test_x_unchanged_after_direction_flip_right_to_left(self, qtbot: object) -> None:
+        """When direction flips +1→-1, x should NOT change."""
+        from mochi.core.canvas import Canvas
+        from mochi.core.fsm import PetState
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)
+
+        canvas._physics.x = 500.0
+        canvas._physics.direction = 1
+        canvas._fsm.direction = 1
+
+        # Flip direction via EdgePause
+        canvas._fsm.transition_to(PetState.EdgePause)
+        canvas._fsm._on_timer_expired()
+        assert canvas._fsm.direction == -1
+
+        canvas._advance_frame()
+
+        assert canvas._physics.direction == -1
+        assert canvas._physics.x == pytest.approx(500.0, rel=1e-6)
+
+    def test_x_unchanged_after_direction_flip_left_to_right(self, qtbot: object) -> None:
+        """When direction flips -1→+1, x should NOT change."""
+        from mochi.core.canvas import Canvas
+        from mochi.core.fsm import PetState
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)
+
+        canvas._physics.x = 100.0
+        canvas._physics.direction = -1
+        canvas._fsm.direction = -1
+
+        # Flip direction via EdgePause
+        canvas._fsm.transition_to(PetState.EdgePause)
+        canvas._fsm._on_timer_expired()
+        assert canvas._fsm.direction == 1
+
+        # Idle to prevent physics movement
+        canvas._fsm.transition_to(PetState.Idle)
+        canvas._advance_frame()
+
+        assert canvas._physics.direction == 1
+        assert canvas._physics.x == pytest.approx(100.0, rel=1e-6)

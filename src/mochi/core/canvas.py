@@ -137,6 +137,8 @@ class Canvas(QWidget):
         current_state = self._fsm.current_state
 
         # 2.5 Sync physics direction from FSM (FSM owns direction reversal)
+        # Note: ``x`` is the sprite's **left edge** in both directions
+        # (see ``paintEvent``), so no position adjustment is needed on flip.
         self._physics.direction = self._fsm.direction
 
         # 3. Update physics (horizontal movement)
@@ -196,12 +198,17 @@ class Canvas(QWidget):
             if frames and self._current_frame < len(frames):
                 frame = frames[self._current_frame]
 
-                # All sprites face left by default; flip horizontally for
-                # rightward movement so the cat always faces its travel direction.
+                # ``x`` always represents the sprite's **left edge** in canvas
+                # coordinates, regardless of direction.  When facing right
+                # (dir=+1) we flip horizontally via ``scale(-1, 1)`` and adjust
+                # the origin so the flipped sprite still occupies [x, x+w].
+                #
+                # Without the ``+ 1`` offset, the two branches would differ by
+                # one pixel — imperceptible, but this keeps them pixel-identical.
                 if self._physics.direction == 1:
                     painter.save()
                     painter.scale(-1.0, 1.0)
-                    painter.drawPixmap(-x, y, frame)
+                    painter.drawPixmap(-x - frame.width() + 1, y, frame)
                     painter.restore()
                 else:
                     painter.drawPixmap(x, y, frame)
