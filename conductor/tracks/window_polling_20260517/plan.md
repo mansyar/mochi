@@ -11,9 +11,9 @@
 
 ## Phase 2: EnvironmentPoller (QThread + Polling Loop)
 
-- [ ] Task: Implement `EnvironmentPoller(QThread)` skeleton
-    - [ ] Write tests: `test_environment.py` — class exists, is `QThread` subclass, has `platforms_updated = Signal(list)`, accepts `screen_geo: QRect` in `__init__`
-    - [ ] Implement class skeleton: `QThread` subclass with `platforms_updated = Signal(list)`, store `screen_geo` from constructor
+- [x] Task: Implement `EnvironmentPoller(QThread)` skeleton [b50b9c0]
+    - [x] Write tests: `test_environment.py` — class exists, is `QThread` subclass, has `platforms_updated = Signal(list)`, accepts `screen_geo: QRect` in `__init__`
+    - [x] Implement class skeleton: `QThread` subclass with `platforms_updated = Signal(list)`, store `screen_geo` from constructor
 - [ ] Task: Implement window enumeration and filtering
     - [ ] Write tests: filters out minimized windows, empty-title windows, and "Mochi"-titled windows; includes visible windows; uses mocked `pywinctl` to avoid platform dependency
     - [ ] Implement `_get_visible_windows()` — calls `pywinctl.getAllWindows()`, applies filters (minimized, empty title, title "Mochi")
