@@ -7,9 +7,12 @@ the event loop.
 import logging
 import sys
 
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 
+from mochi.core.canvas import Canvas
 from mochi.utils.logger import setup_logging
+from mochi.utils.platform import set_click_through
 
 
 def create_application() -> QApplication:
@@ -42,6 +45,11 @@ def main() -> None:
 
     logger = logging.getLogger("mochi")
     logger.info("Mochi started")
+
+    canvas = Canvas()
+    canvas.show()
+    logger.info("Canvas created: %dx%d", canvas.width(), canvas.height())
+    QTimer.singleShot(0, lambda: set_click_through(canvas, True))
 
     sys.exit(app.exec())
 
