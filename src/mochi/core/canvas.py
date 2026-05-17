@@ -178,7 +178,7 @@ class Canvas(QWidget):
         """Return the Y coordinate for the screen-bottom surface."""
         geo = self._screen_geo
         if geo is not None:
-            return geo.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - config.SPRITE_CELL_HEIGHT
+            return geo.bottom() - config.SPRITE_CELL_HEIGHT
         return 0
 
     def _advance_frame(self) -> None:
