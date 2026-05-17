@@ -1,0 +1,8 @@
+{
+  "track_id": "scaffold_20260517",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-05-17T12:19:00Z",
+  "updated_at": "2026-05-17T12:19:00Z",
+  "description": "Phase 0: Project Foundation — Scaffold & Dev Environment. Set up the runnable Python project skeleton with dev tooling, directory structure, config, logging, platform stubs, and a minimal main.py."
+}
