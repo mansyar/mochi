@@ -60,10 +60,10 @@
 - [x] Run tests and confirm they pass (Green Phase)
 
 ### Task 2.3: Quality gate — full verification
-- [~] `uv run ruff check src/` — zero errors
-- [~] `uv run ruff format --check src/` — zero violations
-- [~] `uv run mypy src/mochi/` — zero errors
-- [~] `uv run pytest` — all tests pass, coverage ≥ 80%
+- [x] `uv run ruff check src/` — zero errors
+- [x] `uv run ruff format --check src/` — zero violations
+- [x] `uv run mypy src/mochi/` — zero errors
+- [x] `uv run pytest` — all tests pass, coverage ≥ 80%`[76c73b6]`
 
 ## Phase 3: Phase Completion Verification
 
