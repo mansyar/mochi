@@ -2,7 +2,7 @@
 
 ## Desktop Cat Pet — "Mochi"
 
-**Last Updated:** 2026-05-17 (Phase 0 completed)
+**Last Updated:** 2026-05-17 (Phase 1, Track 1.1 completed)
 
 Each phase builds on the previous one. Each track within a phase is a **vertical slice** — it touches all layers needed (model, core, UI, tests) to deliver one testable, demoable behavior.
 
@@ -43,22 +43,28 @@ Each phase builds on the previous one. Each track within a phase is a **vertical
 
 > **Goal:** A visible, animated cat sprite on a transparent overlay. Walks on the screen bottom. No window awareness yet.
 
-### Track 1.1 — Transparent Overlay Window
+### Track 1.1 — Transparent Overlay Window ✅
 
-**Modules:** `canvas.py`, `platform.py`
+**Modules:** `canvas.py`, `main.py`, `config.py`, `platform.py`
 
-| Task | Detail |
-|---|---|
-| Create `Canvas` class | `QWidget` with `FramelessWindowHint | WindowStaysOnTopHint | Tool` flags |
-| Enable transparency | `WA_TranslucentBackground`, fullscreen geometry |
-| Enable click-through | Platform-native `set_click_through()` — implement Windows (`WS_EX_TRANSPARENT` via ctypes), stub macOS/Linux |
-| Render a test rectangle | `paintEvent()` draws a colored rectangle at a fixed position |
-| Wire into `main.py` | Show the canvas on launch |
+| Task | Status | Detail |
+|---|---|---|
+| Create `Canvas` class | ✅ Complete | `QWidget` with `FramelessWindowHint | WindowStaysOnTopHint | Tool` flags |
+| Enable transparency | ✅ Complete | `WA_TranslucentBackground`, fullscreen `availableGeometry()` |
+| Enable click-through | ✅ Complete | Windows via ctypes `WS_EX_TRANSPARENT`; macOS/Linux stubbed per ROADMAP |
+| Render a test rectangle | ✅ Complete | Green (`#00FF00`) 64×64 rect at bottom-center using `SCREEN_BOTTOM_MARGIN_PX` |
+| Wire into `main.py` | ✅ Complete | Canvas created in `main()`, shown, dimensions logged, click-through deferred via `QTimer.singleShot(0, ...)` |
+| Add screen config constant | ✅ Complete | `SCREEN_BOTTOM_MARGIN_PX: int = 48` in `config.py` |
 
-**Definition of Done:**
-- [ ] A transparent, always-on-top, click-through window covers the screen
-- [ ] A colored test rectangle is visible
-- [ ] Clicking anywhere passes through to underlying windows
+**Results:**
+- [x] A transparent, always-on-top, click-through window covers the primary monitor
+- [x] A green 64×64 test rectangle is visible at the bottom-center of the screen (above taskbar)
+- [x] Click-through works on Windows (macOS/Linux are no-op stubs — deferred)
+- [x] `uv run pytest` — 58 passed, 1 skipped, 93% coverage
+- [x] `uv run ruff check src/` — zero lint errors
+- [x] `uv run ruff format --check src/` — zero formatting violations
+- [x] `uv run mypy src/mochi/` — zero type errors
+- [x] Review completed and archived (see `conductor/archive/overlay_window_20260517/`)
 
 ### Track 1.2 — Sprite Loading & Idle Animation
 

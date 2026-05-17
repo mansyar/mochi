@@ -32,6 +32,9 @@ MAX_OFFLINE_DECAY_HOURS: float = 48.0
 STATE_WRITE_DEBOUNCE_S: float = 5.0
 ITEM_APPROACH_TIMEOUT_S: float = 10.0
 
+# ── Screen / Canvas ─────────────────────────────────────────────────────
+SCREEN_BOTTOM_MARGIN_PX: int = 48  # px clearance above OS taskbar/dock
+
 # ── Animation / Rendering ───────────────────────────────────────────────
 ANIMATION_TICK_MS: int = 100  # ms per animation frame tick
 SPRITE_CELL_WIDTH: int = 64  # px per sprite cell

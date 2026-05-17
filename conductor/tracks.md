@@ -8,3 +8,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - ~~[x] **Track: Phase 0: Project Foundation — Scaffold & Dev Environment**~~
   ~~*Link: [./archive/scaffold_20260517/](./archive/scaffold_20260517/)*~~
+
+---
+
+- ~~[x] **Track: Track 1.1 — Transparent Overlay Window**~~
+  ~~*Link: [./archive/overlay_window_20260517/](./archive/overlay_window_20260517/)*~~
