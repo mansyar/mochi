@@ -8,9 +8,13 @@ via PyWinCtl and emits an updated surface list.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
+from typing import Any
 
 from PySide6.QtCore import QObject, QRect, QThread, Signal
+
+logger = logging.getLogger("mochi.environment")
 
 
 @dataclass
@@ -56,3 +60,34 @@ class EnvironmentPoller(QThread):
         super().__init__(parent)
         #: Screen geometry captured once on the main thread.
         self._screen_geo: QRect = screen_geo
+        #: Cached surface list from the last successful poll (for error fallback).
+        self._cached_surfaces: list[Surface] = []
+
+    @staticmethod
+    def _get_visible_windows(windows: list[Any]) -> list[Any]:
+        """Filter a list of pywinctl windows to only visible, valid ones.
+
+        Excludes minimized windows, windows with empty titles, and the
+        Mochi overlay window itself.
+
+        Parameters
+        ----------
+        windows : list[Any]
+            Raw window list from ``pywinctl.getAllWindows()``.
+
+        Returns
+        -------
+        list[Any]
+            Filtered window list with only visible, non-Mochi windows.
+        """
+        result: list[Any] = []
+        for w in windows:
+            if getattr(w, "isMinimized", lambda: False)():
+                continue
+            title = getattr(w, "title", "") or ""
+            if not title.strip():
+                continue
+            if title.strip() == "Mochi":
+                continue
+            result.append(w)
+        return result

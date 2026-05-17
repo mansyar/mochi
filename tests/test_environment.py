@@ -25,6 +25,100 @@ class TestEnvironmentPollerSkeleton:
         assert poller is not None
 
 
+class TestWindowFiltering:
+    """_get_visible_windows must filter out unwanted windows."""
+
+    def test_visible_window_included(self) -> None:
+        """Normal visible windows should be included in the result."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        mock_windows = [
+            _make_mock_window(title="Notepad", minimized=False),
+            _make_mock_window(title="Chrome", minimized=False),
+        ]
+        result = poller._get_visible_windows(mock_windows)
+        assert len(result) == 2
+
+    def test_minimized_window_excluded(self) -> None:
+        """Minimized windows should be filtered out."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        mock_windows = [
+            _make_mock_window(title="Notepad", minimized=False),
+            _make_mock_window(title="Hidden App", minimized=True),
+        ]
+        result = poller._get_visible_windows(mock_windows)
+        assert len(result) == 1
+        assert result[0].title == "Notepad"
+
+    def test_empty_title_window_excluded(self) -> None:
+        """Windows with empty titles should be filtered out."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        mock_windows = [
+            _make_mock_window(title="", minimized=False),
+            _make_mock_window(title="Terminal", minimized=False),
+        ]
+        result = poller._get_visible_windows(mock_windows)
+        assert len(result) == 1
+        assert result[0].title == "Terminal"
+
+    def test_mochi_overlay_excluded(self) -> None:
+        """The Mochi overlay window should be filtered out by title."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        mock_windows = [
+            _make_mock_window(title="Mochi", minimized=False),
+            _make_mock_window(title="VS Code", minimized=False),
+        ]
+        result = poller._get_visible_windows(mock_windows)
+        assert len(result) == 1
+        assert result[0].title == "VS Code"
+
+    def test_all_filters_combined(self) -> None:
+        """All filters should work together with mixed windows."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        mock_windows = [
+            _make_mock_window(title="Mochi", minimized=False),
+            _make_mock_window(title="", minimized=False),
+            _make_mock_window(title="Hidden", minimized=True),
+            _make_mock_window(title="Explorer", minimized=False),
+        ]
+        result = poller._get_visible_windows(mock_windows)
+        assert len(result) == 1
+        assert result[0].title == "Explorer"
+
+    def test_empty_window_list(self) -> None:
+        """An empty list should return an empty list."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        result = poller._get_visible_windows([])
+        assert result == []
+
+
+class _MockWindow:
+    """Minimal mock for pywinctl.Window geometry and visibility."""
+
+    def __init__(
+        self,
+        title: str,
+        minimized: bool,
+        left: int = 0,
+        top: int = 0,
+        width: int = 800,
+        height: int = 600,
+    ) -> None:
+        self.title = title
+        self._is_minimized = minimized
+        self.left = left
+        self.top = top
+        self.width = width
+        self.height = height
+
+    def isMinimized(self) -> bool:  # noqa: N802
+        return self._is_minimized
+
+
+def _make_mock_window(title: str, minimized: bool = False) -> _MockWindow:
+    """Helper to create a mock pywinctl Window with minimal required attrs."""
+    return _MockWindow(title=title, minimized=minimized, left=100, top=100, width=800, height=600)
+
+
 class TestSurfaceReexport:
     """Surface must be re-exported from mochi.core."""
 
