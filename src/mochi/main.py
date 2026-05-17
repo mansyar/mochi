@@ -4,6 +4,7 @@ Bootstraps the Qt ``QApplication``, initializes logging, and runs
 the event loop.
 """
 
+import logging
 import sys
 
 from PySide6.QtWidgets import QApplication
@@ -38,9 +39,6 @@ def main() -> None:
     Qt event loop.
     """
     app = create_application()
-    app.setApplicationName("Mochi")
-
-    import logging
 
     logger = logging.getLogger("mochi")
     logger.info("Mochi started")

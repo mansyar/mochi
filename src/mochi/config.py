@@ -29,7 +29,7 @@ BOREDOM_LOW_THRESHOLD: float = 30.0  # below this → bored behaviour
 AFFECTION_AVOIDANCE_THRESHOLD: float = 20.0  # below this → avoids user
 HAPPY_ZOOMIE_CHANCE: float = 0.05  # probability of zoomie per step
 MAX_OFFLINE_DECAY_HOURS: float = 48.0
-STATE_WRITE_DEBOUNCE_S: float = 2.0
+STATE_WRITE_DEBOUNCE_S: float = 5.0
 ITEM_APPROACH_TIMEOUT_S: float = 10.0
 
 # ── Animation / Rendering ───────────────────────────────────────────────

@@ -25,6 +25,9 @@ def setup_logging(debug: bool = False, log_path: str | None = None) -> None:
     """
     level = logging.DEBUG if debug else logging.INFO
     root = logging.getLogger()
+
+    # Prevent duplicate handlers on repeated calls
+    root.handlers.clear()
     root.setLevel(level)
 
     # Console handler (stdout)

@@ -53,6 +53,7 @@ Mochi.app/
 
 # === Application Runtime ===
 mochi.log
+mochi_test_*.txt
 pet_state.json
 pet_state.json.bak
 
