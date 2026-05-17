@@ -4,9 +4,11 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Phase 1, Track 1.3 Complete — Active Development
+**Status:** Phase 2, Track 2.1 Complete — Active Development
 
-> **Project Status:** Phase 0 (Project Foundation) is complete. **Tracks 1.1, 1.2, and 1.3** are complete — the transparent overlay renders the cat sprite with a looping idle breathing animation (8 frames at 250ms intervals, auto-centered frames). The cat autonomously walks left and right along the screen bottom using an FSM-driven Idle→Walk→EdgePause cycle, reversing direction at screen edges with a brief pause. The walk animation uses direction-aware sprite flipping via `QPainter.scale(-1, 1)` and an adaptive tick rate (100ms during Walk, 250ms during Idle). The green test rectangle has been removed. 116 tests passing with 94% coverage, zero lint/type errors. See `ROADMAP.md` for the full development plan.
+> **Project Status:** Phase 0 (Project Foundation) is complete. **Tracks 1.1, 1.2, and 1.3** are complete — the transparent overlay renders the cat sprite with a looping idle breathing animation (8 frames at 250ms intervals, auto-centered frames). The cat autonomously walks left and right along the screen bottom using an FSM-driven Idle→Walk→EdgePause cycle, reversing direction at screen edges with a brief pause. The walk animation uses direction-aware sprite flipping via `QPainter.scale(-1, 1)` and an adaptive tick rate (100ms during Walk, 250ms during Idle). The green test rectangle has been removed.
+>
+> **Track 2.1 (Window Polling & Surface Detection)** is complete — a background `EnvironmentPoller` thread queries `pywinctl.getAllWindows()` every 300ms, filters out minimized/empty-title/Mochi windows, builds a `list[Surface]` (window tops, window sides, screen edges), and emits a `platforms_updated` signal to the main thread via Qt's cross-thread signal-slot mechanism. Canvas stores the surface list and logs update counts. Error handling gracefully degrades on permission errors. **153 tests passing with 91% coverage, zero lint/type errors.** The cat does NOT yet walk on window surfaces — ground snapping is deferred to Track 2.2. See `ROADMAP.md` for the full development plan.
 
 ---
 

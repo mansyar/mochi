@@ -4,7 +4,7 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Phase 1, Track 1.3 Complete — Active Development
+**Status:** Phase 2, Track 2.1 Complete — Active Development
 
 ---
 
@@ -131,7 +131,7 @@ mochi/
 │       │   ├── canvas.py          # Main transparent overlay window + sprite rendering ✅
 │       │   ├── fsm.py             # FSM engine: Idle, Walk, EdgePause states ✅
 │       │   ├── physics.py         # Horizontal movement, screen-boundary detection ✅
-│       │   ├── environment.py     # (planned) PyWinCtl polling, window geometry cache
+│   │   ├── environment.py     # PyWinCtl polling thread, Surface dataclass, surface list builder ✅
 │       │   └── input_bridge.py    # (planned) Platform-native global hotkey bridge
 │       ├── ui/
 │       │   ├── __init__.py
@@ -155,7 +155,8 @@ mochi/
 │   ├── test_logger.py            # 6 tests — logging setup
 │   ├── test_platform.py          # 13 tests — platform detection, click-through
 │   ├── test_main.py              # 6 tests — QApplication bootstrap, Canvas wiring
-│   ├── test_canvas.py            # 6 tests — Canvas widget properties + paintEvent
+│   ├── test_canvas.py            # 9 tests — Canvas widget properties + paintEvent + poller integration ✅
+│   ├── test_environment.py       # 31 tests — Surface dataclass, window filtering, polling loop, error resilience ✅
 │   ├── test_sprites.py           # 11 tests — SpriteSheet loading, slicing, centering ✅
 │   └── test_animation.py         # 10 tests — QTimer animation, frame advancement ✅
 ├── pyproject.toml
@@ -172,7 +173,7 @@ mochi/
 | `pet_state.py` | Metric CRUD, offline decay calculation, JSON read/write | `config` |
 | `canvas.py` | Frameless overlay window, paint loop, sprite rendering, FSM+Physics wire-up | `sprites`, `fsm`, `physics` |
 | `physics.py` | Horizontal movement, screen-boundary detection, frame-rate-independent update | `config` |
-| `environment.py` | PyWinCtl polling thread, PyMonCtl monitor geometry, window rect cache, fullscreen detection | `config` |
+| `environment.py` | PyWinCtl polling thread (QThread + QTimer), Surface dataclass, window rect cache, surface list builder | `config` |
 | `input_bridge.py` | Platform-native hotkey registration → Qt signal emission | `platform` (for OS detection) |
 | `toolbox.py` | Inventory UI widget, item deployment | `pet_state`, `config` |
 | `tray_icon.py` | System tray icon, context menu actions | `canvas`, `pet_state` |
@@ -335,7 +336,7 @@ class InputBridge(QObject):
 
 > **Key advantage:** On Windows, `RegisterHotKey` delivers `WM_HOTKEY` messages through the standard Win32 message queue, which Qt's event loop already processes. This means hotkey handling runs entirely on the main thread — no signal bridge, no thread-safety concerns, no background thread.
 
-3. **The environment poller** runs on a `QThread` and emits a signal with the updated surface list. The main thread copies the list; the poller never mutates shared state directly.
+3. ** The environment poller** runs on a `QThread` and emits a signal with the updated surface list. The main thread copies the list; the poller never mutates shared state directly. (Implemented in Track 2.1.)
 
 ---
 
@@ -536,7 +537,7 @@ Runs after every position update:
 2. **Lateral check:** If `pet_right >= surface_left` or `pet_left <= surface_right` for any vertical surface, transition to Climb.
 3. **Screen bounds:** Clamp position within screen boundaries. Screen bottom = ground of last resort.
 
-#### Surface Data Structure
+#### Surface Data Structure ✅
 
 ```python
 @dataclass
@@ -546,7 +547,11 @@ class Surface:
     window_id: int | None  # OS window handle (for tracking moves/closes)
 ```
 
-### 5.5 Environment Poller (`environment.py`)
+(Implemented in Track 2.1 — see `src/mochi/core/environment.py`.)
+
+### 5.5 Environment Poller (`environment.py`) ✅
+
+(Implemented in Track 2.1. See `src/mochi/core/environment.py` for the full implementation.)
 
 Runs on a dedicated `QThread` with a 300ms `QTimer`.
 
@@ -603,7 +608,7 @@ SPRITE_CELL_HEIGHT: int = 64             # Sprite sheet canvas cell height (spri
 SPRITE_SCALE: float = 1.0               # Base scale (HiDPI via 2× sprite sheet)
 
 # Polling
-WINDOW_POLL_INTERVAL_MS: int = 200
+WINDOW_POLL_INTERVAL_MS: int = 300  # 300ms between environment scans (updated from 200 in Track 2.1 for < 0.5% CPU)
 
 # Items
 FOOD_COOLDOWN_S: float = 30.0
@@ -693,10 +698,11 @@ Run with `uv run pytest`. Coverage reported via `pytest-cov`.
 | `test_logger.py` | Logging setup creates correct handlers, respects debug flag, file/console output | ✅ 6 tests |
 | `test_platform.py` | OS detection, data directory resolution (Windows/macOS/Linux), Alt-key stub, click-through toggle with platform mocking | ✅ 13 tests |
 | `test_main.py` | QApplication bootstrap, org/app name, logging initialization, Canvas wiring | ✅ 6 tests |
-| `test_canvas.py` | Canvas is QWidget subclass, correct window flags, translucent background, geometry matches primary screen, paintEvent doesn't raise | ✅ 6 tests |
+| `test_canvas.py` | Canvas is QWidget subclass, correct window flags, translucent background, geometry matches primary screen, paintEvent doesn't raise, EnvironmentPoller integration | ✅ 9 tests |
 | `test_sprites.py` | SpriteSheet class, 8-frame idle loading at 80x64 per frame, centering tolerance, error handling for missing/invalid files, multi-word keys | ✅ 11 tests |
 | `test_animation.py` | QTimer creation and interval, frame index advancement and wrap-around, drawPixmap called in paintEvent, green rect removal | ✅ 10 tests |
 | `test_fsm.py` | PetState enum, FSM class, Idle→Walk and Walk→Idle timer transitions, EdgePause reversal, same-state no-op, DEBUG logging | ✅ 15 tests |
+| `test_environment.py` | Surface dataclass fields/types/defaults, window filtering (minimized, empty title, Mochi), surface list builder (6 types), polling loop signal emission, error resilience with mocked pywinctl | ✅ 31 tests |
 | `test_physics.py` | Horizontal movement at WALK_SPEED, screen-boundary detection (left/right), half-sprite overshoot, direction-aware edge signalling, position clamping, API forward-compatibility | ✅ 21 tests |
 | `test_pet_state.py` | (Planned) Metric decay calculation, JSON round-trip, corruption recovery, boundary clamping (0–100) | 📋 Planned |
 
@@ -721,7 +727,7 @@ def test_window_flags_set(qtbot):
 - **FSM (implemented):** `test_fsm.py` — 15 tests covering Idle→Walk/Walk→Idle timer transitions, EdgePause reversal, same-state no-op, and DEBUG-level logging.
 - **Physics (implemented):** `test_physics.py` — 21 tests covering horizontal movement, screen-boundary detection with half-sprite overshoot, direction-aware edge signalling, and forward-compatible API surface.
 - **Hotkey bridge (planned):** Verify `InputBridge.register()` succeeds on each platform.
-- **Signal flow (planned):** Verify `EnvironmentPoller` → `platforms_updated` signal.
+- **Signal flow (implemented):** `EnvironmentPoller` → `platforms_updated` signal verified via mocked `pywinctl` in `test_environment.py`. Canvas `_on_platforms_updated` stores surface list in `test_canvas.py`.
 
 ### 8.3 Manual QA Checklist
 

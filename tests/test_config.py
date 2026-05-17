@@ -119,6 +119,19 @@ class TestAnimationRenderConstants:
         assert config.SPRITE_SCALE > 0
 
 
+class TestPollingConstants:
+    """All polling constants must be valid."""
+
+    def test_window_poll_interval_ms_exists_and_correct_value(self) -> None:
+        assert hasattr(config, "WINDOW_POLL_INTERVAL_MS")
+        assert config.WINDOW_POLL_INTERVAL_MS == 300
+
+    def test_window_poll_interval_ms_is_positive_int(self) -> None:
+        val = config.WINDOW_POLL_INTERVAL_MS
+        assert isinstance(val, int)
+        assert val > 0
+
+
 class TestScreenCanvasConstants:
     """All screen/canvas constants must be valid."""
 

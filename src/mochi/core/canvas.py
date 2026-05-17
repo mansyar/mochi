@@ -15,6 +15,7 @@ from PySide6.QtGui import QPainter, QPixmap
 from PySide6.QtWidgets import QApplication, QWidget
 
 from mochi import config
+from mochi.core.environment import EnvironmentPoller, Surface
 from mochi.core.fsm import FSM, PetState
 from mochi.core.physics import Physics
 from mochi.ui.sprites import SpriteSheet
@@ -85,6 +86,17 @@ class Canvas(QWidget):
         )
         self._last_tick: float = time.monotonic()
 
+        # ── Surface list (from EnvironmentPoller) ──────────────────────────
+        self._surfaces: list[Surface] = []
+
+        # ── Environment poller (started lazily in showEvent) ───────────────
+        self._poller: EnvironmentPoller | None = None
+        if self._screen_geo is not None:
+            self._poller = EnvironmentPoller(screen_geo=self._screen_geo)
+            self._poller.platforms_updated.connect(self._on_platforms_updated)
+            # Note: _poller.start() called in showEvent to avoid thread
+            # conflicts during widget construction in tests.
+
         # ── Animation timer (adaptive rate) ───────────────────────────────
         self._animation_timer: QTimer = QTimer(self)
         self._animation_timer.setInterval(_TICK_INTERVALS[PetState.Idle])
@@ -113,6 +125,40 @@ class Canvas(QWidget):
         """Expose the Physics instance for testing and external control."""
         return self._physics
 
+    # ── Public helpers ──────────────────────────────────────────────────
+
+    def showEvent(self, event: object) -> None:  # noqa: N802
+        """Start the environment poller when the canvas is first shown."""
+        if self._poller is not None and not self._poller.isRunning():
+            self._poller.start()
+        super().showEvent(event)  # type: ignore[arg-type]
+
+    def closeEvent(self, event: object) -> None:  # noqa: N802
+        """Clean up the poller thread on window close."""
+        self._stop_poller()
+        super().closeEvent(event)  # type: ignore[arg-type]
+
+    def _stop_poller(self) -> None:
+        """Safely stop and clean up the environment poller thread."""
+        if self._poller is not None:
+            p = self._poller
+            self._poller = None
+            p.platforms_updated.disconnect(self._on_platforms_updated)
+            p.quit()
+            p.wait(2000)
+            p.deleteLater()
+
+    def _on_platforms_updated(self, surfaces: list[Surface]) -> None:
+        """Store the latest surface list from the environment poller.
+
+        Parameters
+        ----------
+        surfaces : list[Surface]
+            The latest list of walkable surfaces on the desktop.
+        """
+        self._surfaces = surfaces
+        logger.info("Surfaces updated: %d surfaces", len(surfaces))
+
     # ── Internal ─────────────────────────────────────────────────────────
 
     def _screen_bottom_y(self) -> int:
@@ -137,6 +183,8 @@ class Canvas(QWidget):
         current_state = self._fsm.current_state
 
         # 2.5 Sync physics direction from FSM (FSM owns direction reversal)
+        # Note: ``x`` is the sprite's **left edge** in both directions
+        # (see ``paintEvent``), so no position adjustment is needed on flip.
         self._physics.direction = self._fsm.direction
 
         # 3. Update physics (horizontal movement)
@@ -196,12 +244,17 @@ class Canvas(QWidget):
             if frames and self._current_frame < len(frames):
                 frame = frames[self._current_frame]
 
-                # All sprites face left by default; flip horizontally for
-                # rightward movement so the cat always faces its travel direction.
+                # ``x`` always represents the sprite's **left edge** in canvas
+                # coordinates, regardless of direction.  When facing right
+                # (dir=+1) we flip horizontally via ``scale(-1, 1)`` and adjust
+                # the origin so the flipped sprite still occupies [x, x+w].
+                #
+                # Without the ``+ 1`` offset, the two branches would differ by
+                # one pixel — imperceptible, but this keeps them pixel-identical.
                 if self._physics.direction == 1:
                     painter.save()
                     painter.scale(-1.0, 1.0)
-                    painter.drawPixmap(-x, y, frame)
+                    painter.drawPixmap(-x - frame.width() + 1, y, frame)
                     painter.restore()
                 else:
                     painter.drawPixmap(x, y, frame)
