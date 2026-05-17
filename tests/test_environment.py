@@ -2,9 +2,27 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import QRect
+from PySide6.QtCore import QRect, QThread, Signal
 
-from mochi.core.environment import Surface
+from mochi.core.environment import EnvironmentPoller, Surface
+
+
+class TestEnvironmentPollerSkeleton:
+    """EnvironmentPoller must be a QThread subclass with a platforms_updated signal."""
+
+    def test_poller_is_qthread_subclass(self) -> None:
+        """EnvironmentPoller must inherit from QThread."""
+        assert issubclass(EnvironmentPoller, QThread)
+
+    def test_poller_has_platforms_updated_signal(self) -> None:
+        """EnvironmentPoller must declare a platforms_updated Signal(list)."""
+        assert hasattr(EnvironmentPoller, "platforms_updated")
+        assert isinstance(EnvironmentPoller.platforms_updated, Signal)
+
+    def test_poller_accepts_screen_geo(self) -> None:
+        """EnvironmentPoller should accept a screen_geo QRect argument."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        assert poller is not None
 
 
 class TestSurfaceReexport:

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from PySide6.QtCore import QRect
+from PySide6.QtCore import QObject, QRect, QThread, Signal
 
 
 @dataclass
@@ -31,3 +31,28 @@ class Surface:
     rect: QRect
     surface_type: str
     window_id: int | None
+
+
+class EnvironmentPoller(QThread):
+    """Background thread that polls active windows and emits surface lists.
+
+    Runs a ``QTimer`` at ``WINDOW_POLL_INTERVAL_MS`` on its own event loop.
+    Each tick, it queries ``pywinctl`` for visible windows, builds a
+    ``list[Surface]``, and emits ``platforms_updated`` to the main thread.
+
+    Parameters
+    ----------
+    screen_geo : QRect
+        The primary monitor's available geometry, captured once on the main
+        thread (``QScreen.availableGeometry()``).
+    parent : QObject or None
+        Optional parent QObject.
+    """
+
+    #: Emitted on each poll tick with the latest ``list[Surface]``.
+    platforms_updated = Signal(list)
+
+    def __init__(self, screen_geo: QRect, parent: QObject | None = None) -> None:
+        super().__init__(parent)
+        #: Screen geometry captured once on the main thread.
+        self._screen_geo: QRect = screen_geo
