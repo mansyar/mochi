@@ -1,0 +1,56 @@
+[project]
+name = "mochi"
+version = "1.0.0"
+description = "A lightweight, cross-platform desktop cat companion"
+requires-python = ">= 3.11"
+dependencies = [
+    "PySide6-Essentials >= 6.7, < 7.0",
+    "pywinctl >= 0.4, < 1.0",
+    "pymonctl >= 0.4, < 1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest >= 8.0",
+    "pytest-qt >= 4.4",
+    "pytest-cov >= 6.0",
+    "pytest-xdist >= 3.5",
+    "mypy >= 1.13",
+    "ruff >= 0.9.0",
+    "PyInstaller >= 6.0",
+]
+release = [
+    "Nuitka >= 2.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["mochi"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["pywinctl", "pymonctl"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+qt_api = "pyside6"
+addopts = "--cov=src/mochi --cov-report=term-missing --cov-report=html --cov-omit=__main__.py"
+
+[tool.coverage.run]
+source = ["src/mochi"]
+omit = ["__main__.py"]
