@@ -91,15 +91,14 @@ class Canvas(QWidget):
 
         # ── FSM & Physics ─────────────────────────────────────────────────
         self._fsm: FSM = FSM()
+        # Compute ground offset from sprite content bounds (before Physics)
+        self._ground_offset: float = self._compute_ground_offset()
         bottom_y = self._screen_bottom_y()
-
-        # Compute ground offset from sprite content bounds
-        ground_offset = self._compute_ground_offset()
 
         self._physics: Physics = Physics(
             x=(self.width() - config.SPRITE_CELL_WIDTH) // 2,
             y=bottom_y,
-            ground_offset=ground_offset,
+            ground_offset=self._ground_offset,
         )
         self._last_tick: float = time.monotonic()
 
@@ -182,8 +181,13 @@ class Canvas(QWidget):
     def _screen_bottom_y(self) -> int:
         """Return the Y coordinate for the screen-bottom surface."""
         geo = self._screen_geo
+        offset = (
+            int(self._ground_offset)
+            if hasattr(self, "_ground_offset")
+            else config.SPRITE_CELL_HEIGHT
+        )
         if geo is not None:
-            return geo.bottom() - config.SPRITE_CELL_HEIGHT
+            return geo.bottom() - offset
         return 0
 
     def _compute_ground_offset(self) -> float:
