@@ -11,7 +11,8 @@ import sys
 from pathlib import Path
 from typing import ClassVar
 
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QPainter, QPixmap
 
 from mochi import config
 
@@ -144,11 +145,81 @@ class SpriteSheet:
 
         for row in range(rows):
             for col in range(cols):
-                frame = pixmap.copy(col * cell, row * cell, cell, cell)
-                frames.append(frame)
+                raw_frame = pixmap.copy(col * cell, row * cell, cell, cell)
+                centered = self._autocenter_frame(raw_frame)
+                frames.append(centered)
 
         self._cache[animation_key] = frames
         return frames
+
+    @staticmethod
+    def _autocenter_frame(frame: QPixmap) -> QPixmap:
+        """Center the visible content of a sprite frame within the cell.
+
+        Sprite sheets often have animation frames where the character's
+        content (non-transparent pixels) shifts position from frame to
+        frame (e.g. a tail flick moving the center of mass).  This method
+        detects the content bounding box and re-centers it so the
+        animation appears stable — the character stays in place while
+        animating.
+
+        Parameters
+        ----------
+        frame : QPixmap
+            The raw sliced frame pixmap (64x64).
+
+        Returns
+        -------
+        QPixmap
+            The centered frame (the original is returned unchanged if
+            the content is already within 1 pixel of the center).
+        """
+        cell = SpriteSheet._CELL_SIZE
+        image = frame.toImage()
+
+        # Scan for non-transparent content bounds.
+        min_x, max_x = cell, 0
+        min_y, max_y = cell, 0
+
+        for y in range(cell):
+            for x in range(cell):
+                px = image.pixelColor(x, y)
+                if px.alpha() > 0:
+                    if x < min_x:
+                        min_x = x
+                    if x > max_x:
+                        max_x = x
+                    if y < min_y:
+                        min_y = y
+                    if y > max_y:
+                        max_y = y
+
+        # Empty frame — return as-is.
+        if max_x == 0:
+            return frame
+
+        content_cx = (min_x + max_x) / 2.0
+        content_cy = (min_y + max_y) / 2.0
+        frame_center = (cell - 1) / 2.0
+
+        offset_x = round(content_cx - frame_center)
+        offset_y = round(content_cy - frame_center)
+
+        # Already centered within 1 px — skip reprocessing.
+        if abs(offset_x) <= 1 and abs(offset_y) <= 1:
+            return frame
+
+        # Create a new transparent pixmap and draw the content centered.
+        centered = QPixmap(cell, cell)
+        centered.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(centered)
+        try:
+            painter.drawPixmap(-offset_x, -offset_y, frame)
+        finally:
+            painter.end()
+
+        return centered
 
     def get_frames(self, animation_key: str) -> list[QPixmap]:
         """Return the cached frame list for an animation key.

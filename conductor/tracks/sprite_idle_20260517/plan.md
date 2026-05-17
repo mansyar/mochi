@@ -68,8 +68,8 @@
 ## Phase 3: Phase Completion Verification
 
 ### Task 3.1: Conductor - User Manual Verification 'Track 1.2: Sprite Loading & Idle Animation' (Protocol in workflow.md)
-- [ ] Run automated test suite
-- [ ] Present manual verification steps to user
-- [ ] Await user confirmation
+- [~] Run automated test suite
+- [~] Present manual verification steps to user
+- [~] Await user confirmation
 - [ ] Create checkpoint commit with git notes
 - [ ] Mark phase complete in plan

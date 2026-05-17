@@ -98,6 +98,47 @@ class TestSpriteSheetFunctionality:
         assert frames == []
         mock_warn.assert_called_once()
 
+    def test_frames_are_centered_within_tolerance(self, qtbot: object) -> None:
+        """Each loaded idle frame should have its content centered within 2px."""
+        from mochi.ui.sprites import SpriteSheet
+
+        sheet = SpriteSheet(self.SPRITES_DIR)
+        frames = sheet.load("idle")
+        cell = self.CELL_W
+        frame_center = (cell - 1) / 2.0
+
+        for idx, frame in enumerate(frames):
+            image = frame.toImage()
+            min_x, max_x = cell, 0
+            min_y, max_y = cell, 0
+
+            for y in range(cell):
+                for x in range(cell):
+                    px = image.pixelColor(x, y)
+                    if px.alpha() > 0:
+                        if x < min_x:
+                            min_x = x
+                        if x > max_x:
+                            max_x = x
+                        if y < min_y:
+                            min_y = y
+                        if y > max_y:
+                            max_y = y
+
+            if max_x > 0:  # Has content
+                content_cx = (min_x + max_x) / 2.0
+                content_cy = (min_y + max_y) / 2.0
+                offset_x = abs(content_cx - frame_center)
+                offset_y = abs(content_cy - frame_center)
+                assert offset_x <= 2.0, (
+                    f"Frame {idx}: content center_x {content_cx:.1f} is "
+                    f"{offset_x:.1f}px from frame center {frame_center}"
+                )
+                assert offset_y <= 2.0, (
+                    f"Frame {idx}: content center_y {content_cy:.1f} is "
+                    f"{offset_y:.1f}px from frame center {frame_center}"
+                )
+
     def test_attack_1_multiword_key(self, qtbot: object) -> None:
         """Multi-word keys like 'attack 1' should match 'ATTACK 1.png'."""
         from mochi.ui.sprites import SpriteSheet
