@@ -1,6 +1,5 @@
 """Tests for mochi.main and mochi.__main__."""
 
-import logging
 from unittest.mock import MagicMock, patch
 
 from mochi import main
