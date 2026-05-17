@@ -64,11 +64,11 @@
     - [x] Run `uv run mypy src/mochi/` — zero errors
 
 ### Task 4: Final verification & code quality
-- [ ] Run full test suite: `uv run pytest` — all tests pass
-- [ ] Run linter: `uv run ruff check src/` — zero errors
-- [ ] Run formatter: `uv run ruff format --check src/` — zero violations
-- [ ] Run type checker: `uv run mypy src/mochi/` — zero errors
-- [ ] Verify coverage meets requirements
+- [x] Run full test suite: `uv run pytest` — 58 passed, 1 skipped
+- [x] Run linter: `uv run ruff check src/` — zero errors
+- [x] Run formatter: `uv run ruff format --check src/` — zero violations
+- [x] Run type checker: `uv run mypy src/mochi/` — zero errors
+- [x] Verify coverage meets requirements — 93% overall (above 80% target)
 
 ### Task 5: Phase Completion Verification
 - [ ] Task: Conductor - User Manual Verification 'Track 1.1 — Transparent Overlay Window' (Protocol in workflow.md)

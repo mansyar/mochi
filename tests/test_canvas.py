@@ -1,9 +1,9 @@
 """Tests for mochi.core.canvas."""
 
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from PySide6.QtCore import Qt, QRect
+from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QWidget
 
@@ -13,8 +13,7 @@ class TestCanvasClass:
 
     def test_canvas_module_importable(self) -> None:
         """Importing the module should not raise."""
-        import mochi.core.canvas  # noqa: F811
-        from mochi.core.canvas import Canvas  # noqa: F811
+        import mochi.core.canvas  # noqa: F401
 
     def test_canvas_is_qwidget_subclass(self) -> None:
         """Canvas must inherit from QWidget."""
@@ -78,14 +77,11 @@ class TestCanvasWidget:
         finally:
             painter.end()
 
-    @pytest.mark.skipif(
-        "not pytest.approx" or True,  # Skip by default — requires display
-        reason="Pixel grab requires a visible display",
-    )
+    @pytest.mark.skipif(True, reason="Pixel grab requires a visible display")
     def test_green_pixel_at_bottom_center(self, qtbot: object) -> None:
         """The bottom-center pixel of the canvas should be green (#00FF00)."""
-        from mochi.core.canvas import Canvas
         from mochi import config
+        from mochi.core.canvas import Canvas
 
         canvas = Canvas()
         qtbot.addWidget(canvas)  # type: ignore[attr-defined]
