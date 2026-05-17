@@ -29,6 +29,12 @@ class TestPetStateEnum:
 
         assert PetState.EdgePause is not None
 
+    def test_pet_state_has_fall(self) -> None:
+        """PetState must have a Fall member."""
+        from mochi.core.fsm import PetState
+
+        assert PetState.Fall is not None
+
 
 class TestFSMClass:
     """Test that FSM class definition is correct."""
@@ -199,3 +205,48 @@ class TestFSMTransitionToAPI:
         fsm = FSM()
         result = fsm.transition_to(PetState.Walk)
         assert result is None
+
+
+class TestFSMFallState:
+    """Test the Fall state and its transitions."""
+
+    def test_walk_to_fall_transition(self) -> None:
+        """Walk→Fall should work via explicit transition_to."""
+        from mochi.core.fsm import FSM, PetState
+
+        fsm = FSM()
+        fsm.transition_to(PetState.Walk)
+        fsm.transition_to(PetState.Fall)
+        assert fsm.current_state == PetState.Fall
+
+    def test_fall_to_idle_transition(self) -> None:
+        """Fall→Idle should work via explicit transition_to."""
+        from mochi.core.fsm import FSM, PetState
+
+        fsm = FSM()
+        fsm.transition_to(PetState.Fall)
+        fsm.transition_to(PetState.Idle)
+        assert fsm.current_state == PetState.Idle
+
+    def test_fall_timer_is_infinite(self) -> None:
+        """Fall state should be immune to timer-based auto-transition."""
+        from mochi.core.fsm import FSM, PetState
+
+        fsm = FSM()
+        fsm.transition_to(PetState.Fall)
+        # Tick with a huge dt — Fall's timer is inf, so it should stay in Fall
+        fsm.tick(100.0)
+        assert fsm.current_state == PetState.Fall, (
+            "Fall state should NOT auto-transition even after 100s"
+        )
+
+    def test_on_timer_expired_fall_noop(self) -> None:
+        """_on_timer_expired should not raise when state is Fall (defensive no-op)."""
+        from mochi.core.fsm import FSM, PetState
+
+        fsm = FSM()
+        fsm.transition_to(PetState.Fall)
+        # Should not raise
+        fsm._on_timer_expired()
+        # State should remain Fall
+        assert fsm.current_state == PetState.Fall

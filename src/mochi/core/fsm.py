@@ -26,18 +26,21 @@ class PetState:
     Idle: PetState  #: Sitting / loafing, subtle breathing animation.
     Walk: PetState  #: Horizontal movement along a surface.
     EdgePause: PetState  #: Brief pause at screen edge before reversing.
+    Fall: PetState  #: Free-fall with gravity acceleration.
 
 
 # --- Define singleton instances ---
 PetState.Idle = PetState()
 PetState.Walk = PetState()
 PetState.EdgePause = PetState()
+PetState.Fall = PetState()
 
 # Dict lookup for repr / display.
 _STATE_NAMES: dict[PetState, str] = {
     PetState.Idle: "Idle",
     PetState.Walk: "Walk",
     PetState.EdgePause: "EdgePause",
+    PetState.Fall: "Fall",
 }
 
 
@@ -122,6 +125,10 @@ class FSM:
             low, high = config.WALK_TO_IDLE_TIMER
         elif state is PetState.EdgePause:
             low, high = (0.5, 1.0)
+        elif state is PetState.Fall:
+            # Physics-driven — never auto-transitions via timer
+            self._timer = float("inf")
+            return
         else:
             low, high = (1.0, 1.0)
 
@@ -136,3 +143,6 @@ class FSM:
         elif self._state is PetState.EdgePause:
             self.direction *= -1  # reverse direction
             self.transition_to(PetState.Walk)
+        elif self._state is PetState.Fall:
+            logger.warning("Fall state timer expired unexpectedly — no-op")
+            return
