@@ -29,5 +29,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Track 2.2 — Gravity, Falling & Ground Snapping**
+- [~] **Track: Track 2.2 — Gravity, Falling & Ground Snapping**
   *Link: [./tracks/gravity_fall_20260518/](./tracks/gravity_fall_20260518/)*
