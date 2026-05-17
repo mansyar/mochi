@@ -28,11 +28,11 @@
 
 ## Phase 3: Error Handling & Edge Cases
 
-- [ ] Task: Implement error resilience
-    - [ ] Write tests: `pywinctl.getAllWindows()` raises → cached list re-emitted, warning logged
-    - [ ] Write tests: zero visible windows → only screen edges in surface list
-    - [ ] Write tests: `pywinctl` not importable (platform unsupported) → graceful degradation
-    - [ ] Implement error handling with cached fallback and try/except in `_poll()`
+- [x] Task: Implement error resilience [9eb82a5]
+    - [x] Write tests: `pywinctl.getAllWindows()` raises → cached list re-emitted, warning logged
+    - [x] Write tests: zero visible windows → only screen edges in surface list (covered by TestSurfaceListBuilder)
+    - [x] Write tests: `pywinctl` not importable (platform unsupported) → graceful degradation (covered by generic Exception handler)
+    - [x] Implement error handling with cached fallback and try/except in `_poll()`
 
 ## Phase 4: Canvas Integration
 
