@@ -72,46 +72,38 @@
 
 **Goal:** Integrate Fall state, gravity physics, fall sprite (from JUMP.png middle frame), and landing into the Canvas animation loop with correct tick ordering.
 
-- [~] Task: Write Canvas integration tests for Fall
-    - [ ] `test_canvas.py`: `_advance_frame` transitions to Fall when surface is lost (mock surfaces)
-    - [ ] `test_canvas.py`: `_advance_frame` transitions to Idle when landing detected
-    - [ ] `test_canvas.py`: Fall sprite key is used when state is Fall
-    - [ ] `test_canvas.py`: Animation tick interval is correct for Fall state
-    - [ ] `test_canvas.py`: Middle frame of JUMP.png used as fall sprite in Canvas init
-    - [ ] `test_canvas.py`: Physics receives surfaces list in update() call
-    - [ ] `test_canvas.py`: `_advance_frame` does NOT reorder — FSM tick runs AFTER physics update
+- [x] Task: Write Canvas integration tests for Fall [ccbd9e3]
+    - [x] `test_canvas.py`: `_advance_frame` transitions to Fall when surface is lost
+    - [x] `test_canvas.py`: `_advance_frame` transitions to Idle when landing detected
+    - [x] `test_canvas.py`: Fall sprite key is used when state is Fall
+    - [x] `test_canvas.py`: Animation tick interval is correct for Fall state
+    - [x] `test_canvas.py`: Middle frame of JUMP.png used as fall sprite
+    - [x] `test_canvas.py`: Physics receives surfaces list in update() call
+    - [x] `test_canvas.py`: FSM tick runs AFTER physics update
 
-- [ ] Task: Load fall sprite from JUMP.png middle frame
-    - [ ] `canvas.py`: In `__init__`, add `"fall": [self._spritesheet.load("jump")[1]]` to `_animations` (frame index 1 of 3)
-    - [ ] Guard against IndexError if jump frames are fewer than 2: fallback to empty list with warning
+- [x] Task: Load fall sprite from JUMP.png middle frame [ccbd9e3]
+    - [x] `canvas.py`: Load jump frames, extract index 1 as fall sprite
+    - [x] Guard against IndexError if jump frames < 2
 
-- [ ] Task: Add Fall sprite key and tick interval mappings
-    - [ ] `canvas.py`: Add `PetState.Fall: "fall"` to `_SPRITE_KEYS`
-    - [ ] `canvas.py`: Add `PetState.Fall: 100` to `_TICK_INTERVALS` (10 FPS — keeps landing detection responsive)
+- [x] Task: Add Fall sprite key and tick interval mappings [ccbd9e3]
+    - [x] `canvas.py`: Add `PetState.Fall: "fall"` to `_SPRITE_KEYS`
+    - [x] `canvas.py`: Add `PetState.Fall: 100` to `_TICK_INTERVALS`
 
-- [ ] Task: Pass surfaces list to Physics.update()
-    - [ ] `canvas.py`: In `_advance_frame()`, pass `self._surfaces` to `self._physics.update(..., surfaces=self._surfaces)`
+- [x] Task: Pass surfaces list to Physics.update() [ccbd9e3]
+    - [x] `canvas.py`: Pass `self._surfaces` to `physics.update(surfaces=...)`
 
-- [ ] Task: Reorder _advance_frame to prevent race condition
-    - [ ] `canvas.py`: Change _advance_frame order to:
-        1. Compute dt
-        2. Sync physics direction from FSM
-        3. Call `physics.update(surfaces=...)` → get `PhysicsResult`
-        4. If Walk and `result.surface_lost` → `fsm.transition_to(PetState.Fall)`
-        5. If Fall and `result.landed` → `fsm.transition_to(PetState.Idle)`
-        6. Call `fsm.tick(dt)` — safe: Fall has inf timer
-        7. Handle `result.edge_hit` → `fsm.transition_to(PetState.EdgePause)`
-        8. Determine sprite key, advance frame, update timer interval, repaint
-    - [ ] Update the existing `edge_hit = physics.update(...)` unpack to use `PhysicsResult`
+- [x] Task: Reorder _advance_frame to prevent race condition [ccbd9e3]
+    - [x] `canvas.py`: Physics before FSM tick, handle surface-loss and landing
+    - [x] Use `PhysicsResult` instead of `bool` return
 
-- [ ] Task: Handle surface-loss and landing signals in Canvas
-    - [ ] `canvas.py`: After `physics.update()`, check `result.surface_lost` and transition if Walk
-    - [ ] `canvas.py`: After `physics.update()`, check `result.landed` and transition if Fall
+- [x] Task: Handle surface-loss and landing signals in Canvas [ccbd9e3]
+    - [x] `canvas.py`: Check `result.surface_lost` → transition Walk→Fall
+    - [x] `canvas.py`: Check `result.landed` → transition Fall→Idle
 
-- [ ] Task: Run full test suite and verify
-    - [ ] Run `uv run pytest` — all tests pass
-    - [ ] Run `uv run ruff check src/` — zero lint errors
-    - [ ] Run `uv run ruff format --check src/` — zero formatting violations
-    - [ ] Run `uv run mypy src/mochi/` — zero type errors
+- [x] Task: Run full test suite and verify [ccbd9e3]
+    - [x] `uv run pytest` — 182 passed, 1 skipped
+    - [x] `uv run ruff check src/` — zero lint errors
+    - [x] `uv run ruff format --check src/` — zero violations
+    - [x] `uv run mypy src/mochi/` — zero type errors
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
