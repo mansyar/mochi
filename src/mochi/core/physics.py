@@ -179,7 +179,9 @@ class Physics:
             # Vertical support check: pet bottom is at or near surface top
             if (
                 abs(pet_bottom - surface_top) <= _SUPPORT_TOLERANCE
-                and s.rect.left() <= pet_center_x <= s.rect.right()
+                and s.rect.left() - _SUPPORT_TOLERANCE
+                <= pet_center_x
+                <= s.rect.right() + _SUPPORT_TOLERANCE
             ):
                 return True
 
@@ -211,7 +213,12 @@ class Physics:
             if cat_top >= surface_top:
                 continue
             # Check vertical: pet bottom >= surface top AND horizontal overlap
-            if pet_bottom >= surface_top and s.rect.left() <= pet_center_x <= s.rect.right():
+            if (
+                pet_bottom >= surface_top
+                and s.rect.left() - _SUPPORT_TOLERANCE
+                <= pet_center_x
+                <= s.rect.right() + _SUPPORT_TOLERANCE
+            ):
                 # Snap to surface
                 self.y = surface_top - config.SPRITE_CELL_HEIGHT
                 return True

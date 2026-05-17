@@ -529,16 +529,17 @@ class TestPhysicsSurfaceLoss:
         assert not result.surface_lost, "Should NOT detect surface loss when supported"
 
     def test_surface_lost_outside_horizontal_bounds(self) -> None:
-        """surface_lost is True when cat walks off the horizontal edge of a surface."""
+        """surface_lost is True when cat walks off a narrow window's horizontal edge."""
         from mochi.core.physics import Physics
 
         p = Physics()
         p.y = 100.0
-        p.x = 2000.0  # outside the surface bounds (surface is 0-1920)
+        p.x = 1000.0  # cat center at 1040 — outside narrow window (width=200, right=199)
 
-        surfaces = [self._make_surface(y=100 + config.SPRITE_CELL_HEIGHT, width=1920)]
+        # Narrow window surface (200px wide)
+        surfaces = [self._make_surface(y=100 + config.SPRITE_CELL_HEIGHT, width=200)]
         result = p.update(1.0, PetState.Walk, 1920, 80, surfaces=surfaces)
 
         assert result.surface_lost, (
-            "Should detect surface loss when cat is outside horizontal bounds"
+            "Should detect surface loss when cat center is past window horizontal edge"
         )
