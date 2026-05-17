@@ -29,6 +29,7 @@ Mochi is a cross-platform Python desktop application built for minimal resource 
 - pytest-cov >= 6.0
 - pytest-xdist >= 3.5
 - mypy >= 1.13
+- ruff >= 0.9.0
 - PyInstaller >= 6.0
 
 ## Release Dependencies
