@@ -11,5 +11,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Track 1.1 — Transparent Overlay Window**
-  *Link: [./tracks/overlay_window_20260517/](./tracks/overlay_window_20260517/)*
+- ~~[x] **Track: Track 1.1 — Transparent Overlay Window**~~
+  ~~*Link: [./archive/overlay_window_20260517/](./archive/overlay_window_20260517/)*~~
