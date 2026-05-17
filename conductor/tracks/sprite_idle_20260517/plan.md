@@ -65,11 +65,11 @@
 - [x] `uv run mypy src/mochi/` — zero errors
 - [x] `uv run pytest` — all tests pass, coverage ≥ 80%`[76c73b6]`
 
-## Phase 3: Phase Completion Verification
+## Phase 3: Phase Completion Verification [checkpoint: 0083bec]
 
 ### Task 3.1: Conductor - User Manual Verification 'Track 1.2: Sprite Loading & Idle Animation' (Protocol in workflow.md)
-- [~] Run automated test suite
-- [~] Present manual verification steps to user
-- [~] Await user confirmation
-- [ ] Create checkpoint commit with git notes
-- [ ] Mark phase complete in plan
+- [x] Run automated test suite
+- [x] Present manual verification steps to user
+- [x] Await user confirmation
+- [x] Create checkpoint commit with git notes
+- [x] Mark phase complete in plan
