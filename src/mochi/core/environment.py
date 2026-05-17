@@ -12,7 +12,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from PySide6.QtCore import QObject, QRect, QThread, Signal
+from PySide6.QtCore import QObject, QRect, QThread, QTimer, Signal
 
 logger = logging.getLogger("mochi.environment")
 
@@ -62,6 +62,33 @@ class EnvironmentPoller(QThread):
         self._screen_geo: QRect = screen_geo
         #: Cached surface list from the last successful poll (for error fallback).
         self._cached_surfaces: list[Surface] = []
+        #: Internal QTimer created in ``run()``.
+        self._timer: QTimer | None = None
+
+    def run(self) -> None:
+        """Thread entry point: create timer and start event loop."""
+        from mochi import config
+
+        self._timer = QTimer()
+        self._timer.setInterval(config.WINDOW_POLL_INTERVAL_MS)
+        self._timer.timeout.connect(self._poll)
+        self._timer.start()
+        self.exec()
+
+    def _poll(self) -> None:
+        """Execute one poll cycle: query windows, build surfaces, emit."""
+        try:
+            import pywinctl
+
+            raw = pywinctl.getAllWindows()
+            visible = self._get_visible_windows(raw)
+            surfaces = self._build_surfaces(visible)
+        except Exception:
+            logger.warning("Window polling failed; re-emitting cached surfaces", exc_info=True)
+            surfaces = list(self._cached_surfaces)
+
+        self._cached_surfaces = surfaces
+        self.platforms_updated.emit(surfaces)
 
     def _build_surfaces(self, windows: list[Any]) -> list[Surface]:
         """Build a list of ``Surface`` objects from filtered windows and screen edges.
@@ -161,8 +188,14 @@ class EnvironmentPoller(QThread):
         """
         result: list[Any] = []
         for w in windows:
-            if getattr(w, "isMinimized", lambda: False)():
-                continue
+            # pywinctl 0.x: isMinimized is a method; newer versions: property
+            is_min_attr = getattr(w, "isMinimized", None)
+            if is_min_attr is not None:
+                if callable(is_min_attr):
+                    if is_min_attr():
+                        continue
+                elif is_min_attr:
+                    continue
             title = getattr(w, "title", "") or ""
             if not title.strip():
                 continue

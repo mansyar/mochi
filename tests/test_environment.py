@@ -133,6 +133,39 @@ def _make_mock_window(
     )
 
 
+class TestPollingLoop:
+    """Polling loop must emit platforms_updated signal on each tick."""
+
+    def test_poll_emits_signal(self) -> None:
+        """_poll() should emit platforms_updated with a list of surfaces."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        results: list[list[Surface]] = []
+
+        def _capture(surfaces: list[Surface]) -> None:
+            results.append(surfaces)
+
+        poller.platforms_updated.connect(_capture)
+        poller._poll()
+        assert len(results) == 1
+        assert len(results[0]) >= 3  # at least 3 screen edges
+
+    def test_poll_includes_screen_edges_with_no_windows(self) -> None:
+        """_poll() should always include screen edges even without real pywinctl."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        results: list[list[Surface]] = []
+
+        def _capture(surfaces: list[Surface]) -> None:
+            results.append(surfaces)
+
+        poller.platforms_updated.connect(_capture)
+        poller._poll()
+        assert len(results) == 1
+        surface_types = {s.surface_type for s in results[0]}
+        assert "screen_bottom" in surface_types
+        assert "screen_left" in surface_types
+        assert "screen_right" in surface_types
+
+
 class TestSurfaceListBuilder:
     """_build_surfaces must produce correct Surface objects for all types."""
 
