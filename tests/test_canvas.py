@@ -147,3 +147,35 @@ class TestCanvasSpritePosition:
 
         assert canvas._physics.direction == 1
         assert canvas._physics.x == pytest.approx(100.0, rel=1e-6)
+
+
+class TestCanvasEnvironmentPoller:
+    """Canvas must create and manage an EnvironmentPoller."""
+
+    def test_canvas_creates_poller(self, qtbot: object) -> None:
+        """Canvas should create an EnvironmentPoller instance."""
+        from mochi.core.canvas import Canvas
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+        assert hasattr(canvas, "_poller")
+        assert canvas._poller is not None
+        # Poller should NOT be running until showEvent
+        assert not canvas._poller.isRunning()
+
+    def test_canvas_has_on_platforms_updated(self, qtbot: object) -> None:
+        """Canvas should have _on_platforms_updated method."""
+        from mochi.core.canvas import Canvas
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+        assert hasattr(canvas, "_on_platforms_updated")
+        assert callable(canvas._on_platforms_updated)
+
+    def test_canvas_stores_surface_list(self, qtbot: object) -> None:
+        """Canvas should store the latest surface list in _surfaces."""
+        from mochi.core.canvas import Canvas
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+        assert hasattr(canvas, "_surfaces")
