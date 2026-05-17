@@ -92,9 +92,14 @@ class Canvas(QWidget):
         # ── FSM & Physics ─────────────────────────────────────────────────
         self._fsm: FSM = FSM()
         bottom_y = self._screen_bottom_y()
+
+        # Compute ground offset from sprite content bounds
+        ground_offset = self._compute_ground_offset()
+
         self._physics: Physics = Physics(
             x=(self.width() - config.SPRITE_CELL_WIDTH) // 2,
             y=bottom_y,
+            ground_offset=ground_offset,
         )
         self._last_tick: float = time.monotonic()
 
@@ -180,6 +185,38 @@ class Canvas(QWidget):
         if geo is not None:
             return geo.bottom() - config.SPRITE_CELL_HEIGHT
         return 0
+
+    def _compute_ground_offset(self) -> float:
+        """Compute the ground contact offset from sprite content bounds.
+
+        Scans idle and walk frames for the maximum content-bottom pixel
+        position within the cell.  This accounts for transparent padding
+        below the cat's feet due to sprite auto-centering.
+
+        Returns
+        -------
+        float
+            Distance from ``self.y`` to the cat's ground contact point.
+            Falls back to ``SPRITE_CELL_HEIGHT`` if no frames are loaded.
+        """
+        cell_h = config.SPRITE_CELL_HEIGHT
+        max_content_bottom = 0
+
+        for key in ("idle", "walk"):
+            frames = self._animations.get(key, [])
+            for frame in frames:
+                img = frame.toImage()
+                for y in range(cell_h):
+                    for x in range(frame.width()):
+                        if img.pixelColor(x, y).alpha() > 0 and y > max_content_bottom:
+                            max_content_bottom = y
+
+        if max_content_bottom == 0:
+            # No content found — fall back to full cell height
+            return float(cell_h)
+
+        # Ground contact is one pixel below the bottommost content pixel
+        return float(max_content_bottom + 1)
 
     def _advance_frame(self) -> None:
         """Animation tick: advance physics, FSM, and sprite frame.

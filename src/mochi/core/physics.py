@@ -54,7 +54,12 @@ class Physics:
         Initial vertical position (default 0).
     """
 
-    def __init__(self, x: float = 0.0, y: float = 0.0) -> None:
+    def __init__(
+        self,
+        x: float = 0.0,
+        y: float = 0.0,
+        ground_offset: float | None = None,
+    ) -> None:
         #: Horizontal position (pixels from left edge of screen).
         self.x: float = x
         #: Vertical position (pixels from top edge of screen).
@@ -63,6 +68,13 @@ class Physics:
         self.velocity_y: float = 0.0
         #: Movement direction (+1 right, -1 left).
         self.direction: int = 1
+        #: Distance from ``y`` to the ground contact point of the sprite.
+        #: Defaults to ``SPRITE_CELL_HEIGHT`` (full cell bottom) for
+        #: backward compatibility; Canvas sets the actual content offset
+        #: from the sprite sheet's autocenter data.
+        self._ground_offset: float = (
+            ground_offset if ground_offset is not None else float(config.SPRITE_CELL_HEIGHT)
+        )
 
     def update(
         self,
@@ -167,7 +179,7 @@ class Physics:
             return False
 
         pet_center_x = self.x + sprite_width / 2.0
-        pet_bottom = self.y + config.SPRITE_CELL_HEIGHT
+        pet_bottom = self.y + self._ground_offset
 
         for s in surfaces:
             if not hasattr(s, "surface_type"):
@@ -198,7 +210,7 @@ class Physics:
         Returns ``True`` and snaps position if landing is found.
         """
         pet_center_x = self.x + sprite_width / 2.0
-        pet_bottom = self.y + config.SPRITE_CELL_HEIGHT
+        pet_bottom = self.y + self._ground_offset
         cat_top = pre_fall_y if pre_fall_y is not None else self.y
 
         # Priority: check surfaces in order (topmost/z-order first)
@@ -219,8 +231,8 @@ class Physics:
                 <= pet_center_x
                 <= s.rect.right() + _SUPPORT_TOLERANCE
             ):
-                # Snap to surface
-                self.y = surface_top - config.SPRITE_CELL_HEIGHT
+                # Snap to surface (ground_offset defines where feet touch)
+                self.y = surface_top - self._ground_offset
                 return True
 
         return False
