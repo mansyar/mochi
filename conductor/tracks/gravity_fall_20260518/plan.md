@@ -1,6 +1,6 @@
 # Track 2.2 — Gravity, Falling & Ground Snapping
 
-## Phase 1: FSM — Add Fall State
+## Phase 1: FSM — Add Fall State [checkpoint: 48e4459]
 
 **Goal:** Add the `Fall` behavior state to the FSM with correct transitions and defensive timer handling.
 
@@ -17,7 +17,7 @@
     - [x] `fsm.py`: In `_set_timer_for_state`, set Fall's timer to `float('inf')` (physics-driven, never auto-transitions)
     - [x] `fsm.py`: Add defensive Fall case to `_on_timer_expired()` — log a warning, no state change
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [48e4459]
 
 ## Phase 2: Physics — Gravity, Landing, and Surface-Loss Detection
 
