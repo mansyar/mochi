@@ -2,39 +2,40 @@
 
 ## Desktop Cat Pet — "Mochi"
 
-**Last Updated:** 2026-05-17
+**Last Updated:** 2026-05-17 (Phase 0 completed)
 
 Each phase builds on the previous one. Each track within a phase is a **vertical slice** — it touches all layers needed (model, core, UI, tests) to deliver one testable, demoable behavior.
 
 ---
 
-## Phase 0: Project Foundation
+## ✅ Phase 0: Project Foundation (COMPLETED)
 
 > **Goal:** A runnable Python project with dev tooling. No visible output yet.
 
 ### Track 0.1 — Scaffold & Dev Environment
 
-**Modules:** `pyproject.toml`, `src/mochi/__init__.py`, `main.py`, `config.py`, `logger.py`, `platform.py`
+**Modules:** `pyproject.toml`, `src/mochi/__init__.py`, `__main__.py`, `main.py`, `config.py`, `src/mochi/utils/logger.py`, `src/mochi/utils/platform.py`
 
-| Task | Detail |
-|---|---|
-| Install uv | `irm https://astral.sh/uv/install.ps1 \| iex` (Windows) or `curl -LsSf https://astral.sh/uv/install.sh \| sh` (macOS/Linux) |
-| Initialize `pyproject.toml` | Name, version, Python ≥3.11, dependencies (PySide6-Essentials, pywinctl, pymonctl), dev extras (pytest, pytest-qt, pytest-cov, pytest-xdist, mypy, pyinstaller). Ruff, mypy, pytest, and coverage config sections |
-| Run `uv sync --extra dev` | Creates `.venv`, installs all deps + dev tools, generates `uv.lock` lockfile |
-| Create project directory structure | All directories and `__init__.py` files per TDD §2 |
-| Implement `config.py` | All tunable constants with documented defaults |
-| Implement `logger.py` | `setup_logging()` with console + file handlers |
-| Implement `platform.py` stubs | `get_platform()`, `get_data_dir()`, `is_alt_held()`, `set_click_through()` — stubs returning defaults |
-| Implement `main.py` | Minimal `QApplication` bootstrap that logs "Mochi started" and exits |
-| Verify tooling | `uv run ruff check src/` passes with zero errors. `uv run mypy src/mochi/` passes |
+| Task | Status | Detail |
+|---|---|---|
+| Initialize `pyproject.toml` | ✅ Complete | Name "mochi", version "1.0.0", Python ≥3.11, all deps + dev extras. Ruff (line-length=100, select=E,W,F,I,N,UP,B,SIM,RUF), mypy (strict), pytest, coverage configured |
+| Run `uv sync --extra dev` | ✅ Complete | `.venv` created, `uv.lock` generated and committed to VCS |
+| Create project directory structure | ✅ Complete | `src/mochi/`, `src/mochi/models/`, `src/mochi/core/`, `src/mochi/ui/`, `src/mochi/utils/`, `tests/`, `assets/sprites/` with all `__init__.py` markers |
+| Implement `config.py` | ✅ Complete | 35 tunable constants: physics (GRAVITY=980, TERMINAL_VELOCITY=600, WALK_SPEED=60, CLIMB_SPEED=40, WALL_SLIDE_SPEED=20), FSM timers, pet metrics, rendering, polling, item cooldowns, onboarding duration |
+| Implement `logger.py` | ✅ Complete | `setup_logging(debug=False, log_path=None)` with console + file handlers, timestamp format, duplicate-handler guard |
+| Implement `platform.py` stubs | ✅ Complete | `get_platform()`, `get_data_dir()`, `is_alt_held()`, `set_click_through()` — Windows click-through implemented via ctypes `WS_EX_TRANSPARENT`, macOS/Linux no-op stubs |
+| Implement `main.py` + `__main__.py` | ✅ Complete | `create_application()` → QApplication bootstrap. `main()` → event loop entry. Type-safe `__main__.py` with `if __name__ == '__main__':` guard |
+| Tests | ✅ Complete | 4 test suites (test_config, test_logger, test_platform, test_main) — 43 tests, 85% coverage |
+| Lint, format, types | ✅ Complete | `ruff check` — zero errors. `ruff format --check` — zero violations. `mypy strict` — zero errors |
 
-**Definition of Done:**
-- [ ] `uv run python -m mochi` launches, logs startup message, exits cleanly
-- [ ] `uv run pytest` discovers test directory (no tests yet, zero failures)
-- [ ] `uv run ruff check src/` — zero lint errors
-- [ ] `uv run mypy src/mochi/` — zero type errors
-- [ ] All config constants are importable from `mochi.config`
-- [ ] `uv.lock` committed to version control
+**Results:**
+- [x] `uv run python -m mochi` launches, logs "Mochi started", opens an empty Qt event loop
+- [x] `uv run pytest` discovers 43 tests, all passing with 85% coverage
+- [x] `uv run ruff check src/` — zero lint errors
+- [x] `uv run ruff format --check src/` — zero formatting violations
+- [x] `uv run mypy src/mochi/` — zero type errors
+- [x] All config constants are importable from `mochi.config`
+- [x] `uv.lock` committed to version control
 
 ---
 

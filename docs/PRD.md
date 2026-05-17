@@ -4,7 +4,9 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Development-Ready Draft
+**Status:** Foundation Phase Complete — Active Development
+
+> **Project Status:** Phase 0 (Project Foundation) is complete. The project skeleton is fully set up with dev tooling (uv, Ruff, mypy, pytest), 43 unit tests passing with 85% coverage, and zero lint/type errors. See `ROADMAP.md` for the full development plan.
 
 ---
 
@@ -60,19 +62,19 @@ The pet transitions smoothly between 7 foundational behavior states based on env
 
 | From | To | Trigger |
 |---|---|---|
-| Idle | Walk | Random timer: 3–8 seconds |
-| Idle | Sleep | Boredom < 20 OR random timer: 30–60 seconds of continuous idle |
-| Walk | Idle | Random timer: 5–12 seconds |
+| Idle | Walk | Random timer: 2–5 seconds |
+| Idle | Sleep | Boredom < 30 OR random timer: 15–30 seconds of continuous idle |
+| Walk | Idle | Random timer: 3–8 seconds |
 | Walk | Fall | Supporting surface lost (window moved/closed/minimized) |
 | Walk | Climb | Leading edge reaches a vertical surface (screen bezel or window side) |
 | Fall | Idle | Ground found (window top edge or screen bottom boundary) |
 | Fall | Climb | Lateral edge contact during descent |
 | Climb | Walk | Reached top edge of climbed surface |
-| Climb | Wall Slide | Random timer: 2–5 seconds OR climb duration exceeds 10 seconds |
+| Climb | Wall Slide | Random timer: 1–3 seconds OR climb duration exceeds 10–15 seconds |
 | Climb | Fall | Supporting window closed/moved during climb |
 | Wall Slide | Fall | Reached bottom of surface OR supporting window closed |
-| Wall Slide | Climb | Random timer: 1–3 seconds |
-| Sleep | Idle | User interaction (feed/pet) OR sleep timer: 15–45 seconds |
+| Wall Slide | Climb | Random timer: 0.5–2 seconds |
+| Sleep | Idle | User interaction (feed/pet) OR sleep timer: 8–15 seconds |
 | Any | Grabbed | User Alt+clicks and drags the cat |
 | Grabbed | Fall | User releases the cat (drops from cursor position) |
 
@@ -87,11 +89,11 @@ The pet transitions smoothly between 7 foundational behavior states based on env
 
 #### 4.1.3 Physics Model
 
-- **Gravity:** The cat accelerates downward at a configurable rate (`GRAVITY = 800 px/s²`) during the Fall state.
+- **Gravity:** The cat accelerates downward at a configurable rate (`GRAVITY = 980 px/s²`) during the Fall state.
 - **Terminal Velocity:** Capped at `TERMINAL_VELOCITY = 600 px/s` to prevent teleportation on large displays.
-- **Walk Speed:** `WALK_SPEED = 80 px/s` (horizontal).
-- **Climb Speed:** `CLIMB_SPEED = 50 px/s` (vertical).
-- **Wall Slide Speed:** `WALL_SLIDE_SPEED = 30 px/s` (vertical, downward).
+- **Walk Speed:** `WALK_SPEED = 60 px/s` (horizontal).
+- **Climb Speed:** `CLIMB_SPEED = 40 px/s` (vertical).
+- **Wall Slide Speed:** `WALL_SLIDE_SPEED = 20 px/s` (vertical, downward).
 
 > All values in `px/s` are logical pixels. On HiDPI displays, the engine uses logical coordinates.
 
@@ -112,9 +114,9 @@ A global keyboard shortcut instantly summons a floating, context-aware toolbox m
 | Item | Icon | Mechanical Effect | Cooldown |
 |---|---|---|---|
 | **Food Dish** | 🍖 | Sets Hunger to 100. Cat walks to dish and plays eating animation (3s) | 30 seconds |
-| **Yarn Ball** | 🧶 | Sets Boredom to 100. Cat bats at yarn with paw animation (5s) | 30 seconds |
+| **Yarn Ball** | 🧶 | Sets Boredom to 100. Cat bats at yarn with paw animation (5s) | 20 seconds |
 | **Pet / Stroke** | 🐾 | Increases Affection by +25 (capped at 100). Cat purrs and leans into hand | 10 seconds |
-| **Cardboard Box** | 📦 | Places a box item on screen. Cat prioritizes walking into the box, locking into a non-disruptive idle loop. Removes box after 60s or on user dismiss | 60 seconds |
+| **Cardboard Box** | 📦 | Places a box item on screen. Cat prioritizes walking into the box, locking into a non-disruptive idle loop. Removes box after 30s or on user dismiss | 60 seconds |
 
 #### 4.1.5 Tamagotchi Attribute Persistence
 
@@ -122,9 +124,9 @@ The cat maintains three virtual pet metrics that persist across application rest
 
 | Metric | Range | Decay Rate | Recovery Method |
 |---|---|---|---|
-| **Hunger** | 0–100 (100 = full) | −5 per real-world hour | Food Dish item |
-| **Boredom** | 0–100 (100 = entertained) | −8 per real-world hour | Yarn Ball item |
-| **Affection** | 0–100 (100 = loved) | −2 per real-world hour | Pet/Stroke item, drag interaction (+5) |
+| **Hunger** | 0–100 (100 = full) | −8 per real-world hour | Food Dish item |
+| **Boredom** | 0–100 (100 = entertained) | −6 per real-world hour | Yarn Ball item |
+| **Affection** | 0–100 (100 = loved) | −4 per real-world hour | Pet/Stroke item, drag interaction (+5) |
 
 **Offline Decay:** On application startup, the engine calculates elapsed real-world time since last exit and applies accumulated decay. Metrics floor at 0. Offline decay is capped at a maximum of **48 hours** — after that, the cat is considered to have fended for itself. This prevents punishing users who don't launch the app for extended periods.
 
@@ -132,8 +134,8 @@ The cat maintains three virtual pet metrics that persist across application rest
 
 | Condition | Behavioral Change |
 |---|---|
-| Hunger < 20 | Walk speed reduced by 30%. Cat occasionally pauses and meows (visual indicator) |
-| Boredom < 20 | Cat prioritizes Sleep state. Reduced walk/climb duration |
+| Hunger < 20 | Walk speed reduced by 50%. Cat occasionally pauses and meows (visual indicator) |
+| Boredom < 30 | Cat prioritizes Sleep state. Reduced walk/climb duration |
 | Affection < 20 | Cat avoids cursor position (walks away when cursor approaches) |
 | All metrics > 70 | Cat has a small chance (5%) of triggering a brief "happy zoomie" sprint |
 

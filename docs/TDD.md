@@ -4,7 +4,7 @@
 
 **Version:** 1.0
 **Last Updated:** 2026-05-17
-**Status:** Development-Ready Draft
+**Status:** Foundation Phase Complete — Active Development
 
 ---
 
@@ -554,48 +554,48 @@ All tunable values live in a single module. No magic numbers in business logic.
 
 ```python
 # Physics
-GRAVITY: float = 800.0          # px/s²
+GRAVITY: float = 980.0          # px/s²
 TERMINAL_VELOCITY: float = 600.0  # px/s
-WALK_SPEED: float = 80.0        # px/s
-CLIMB_SPEED: float = 50.0       # px/s
-WALL_SLIDE_SPEED: float = 30.0  # px/s
+WALK_SPEED: float = 60.0        # px/s
+CLIMB_SPEED: float = 40.0       # px/s
+WALL_SLIDE_SPEED: float = 20.0  # px/s
 
 # FSM Timers (seconds) — (min, max) for random uniform
-IDLE_TO_WALK_TIMER: tuple = (3.0, 8.0)
-IDLE_TO_SLEEP_TIMER: tuple = (30.0, 60.0)
-WALK_TO_IDLE_TIMER: tuple = (5.0, 12.0)
-CLIMB_TO_WALLSLIDE_TIMER: tuple = (2.0, 5.0)
-CLIMB_TIMEOUT: float = 10.0
-WALLSLIDE_TO_CLIMB_TIMER: tuple = (1.0, 3.0)
-SLEEP_DURATION_TIMER: tuple = (15.0, 45.0)
+IDLE_TO_WALK_TIMER: tuple[float, float] = (2.0, 5.0)
+IDLE_TO_SLEEP_TIMER: tuple[float, float] = (15.0, 30.0)
+WALK_TO_IDLE_TIMER: tuple[float, float] = (3.0, 8.0)
+CLIMB_TO_WALLSLIDE_TIMER: tuple[float, float] = (1.0, 3.0)
+CLIMB_TIMEOUT: tuple[float, float] = (10.0, 15.0)
+WALLSLIDE_TO_CLIMB_TIMER: tuple[float, float] = (0.5, 2.0)
+SLEEP_DURATION_TIMER: tuple[float, float] = (8.0, 15.0)
 
 # Metrics
-HUNGER_DECAY_PER_HOUR: float = 5.0
-BOREDOM_DECAY_PER_HOUR: float = 8.0
-AFFECTION_DECAY_PER_HOUR: float = 2.0
-LOW_HUNGER_SPEED_PENALTY: float = 0.3    # 30% speed reduction
-BOREDOM_LOW_THRESHOLD: int = 20
-AFFECTION_AVOIDANCE_THRESHOLD: int = 20
+HUNGER_DECAY_PER_HOUR: float = 8.0
+BOREDOM_DECAY_PER_HOUR: float = 6.0
+AFFECTION_DECAY_PER_HOUR: float = 4.0
+LOW_HUNGER_SPEED_PENALTY: float = 0.5    # 50% speed reduction
+BOREDOM_LOW_THRESHOLD: float = 30.0
+AFFECTION_AVOIDANCE_THRESHOLD: float = 20.0
 HAPPY_ZOOMIE_CHANCE: float = 0.05        # 5%
 MAX_OFFLINE_DECAY_HOURS: float = 48.0    # Cap offline decay
 STATE_WRITE_DEBOUNCE_S: float = 5.0      # Min interval between disk writes
-ITEM_APPROACH_TIMEOUT_S: float = 15.0    # Cancel approach after this
+ITEM_APPROACH_TIMEOUT_S: float = 10.0    # Cancel approach after this
 
 # Rendering
 ANIMATION_TICK_MS: int = 100             # 10 FPS
-SPRITE_CELL_WIDTH: int = 80
+SPRITE_CELL_WIDTH: int = 64
 SPRITE_CELL_HEIGHT: int = 64
-SPRITE_SCALE: float = 2.0               # Display at 2× for visibility
+SPRITE_SCALE: float = 1.0               # Base scale (HiDPI via 2× sprite sheet)
 
 # Polling
-WINDOW_POLL_INTERVAL_MS: int = 300
+WINDOW_POLL_INTERVAL_MS: int = 200
 
 # Items
 FOOD_COOLDOWN_S: float = 30.0
-YARN_COOLDOWN_S: float = 30.0
+YARN_COOLDOWN_S: float = 20.0
 PET_COOLDOWN_S: float = 10.0
 BOX_COOLDOWN_S: float = 60.0
-BOX_DURATION_S: float = 60.0
+BOX_DURATION_S: float = 30.0
 
 # Onboarding
 ONBOARDING_DURATION_S: float = 8.0
@@ -613,17 +613,42 @@ Use Python's `logging` module with structured output.
 # logger.py
 import logging
 import sys
+from pathlib import Path
 
-def setup_logging(debug: bool = False) -> None:
+_LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+
+def setup_logging(debug: bool = False, log_path: str | None = None) -> None:
+    """Configure the root logger with console and file handlers.
+
+    Parameters
+    ----------
+    debug : bool, optional
+        If True, set root logger to DEBUG level (default is INFO).
+    log_path : str or None, optional
+        Path to the log file. If None, defaults to ``mochi.log`` in the
+        current working directory.
+    """
     level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            logging.FileHandler("mochi.log", encoding="utf-8"),
-        ],
-    )
+    root = logging.getLogger()
+
+    # Prevent duplicate handlers on repeated calls
+    root.handlers.clear()
+    root.setLevel(level)
+
+    # Console handler (stdout)
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    console_handler.setLevel(level)
+    console_handler.setFormatter(logging.Formatter(_LOG_FORMAT, datefmt=_DATE_FORMAT))
+    root.addHandler(console_handler)
+
+    # File handler
+    resolved_path = Path(log_path) if log_path else Path("mochi.log")
+    file_handler = logging.FileHandler(resolved_path, encoding="utf-8")
+    file_handler.setLevel(level)
+    file_handler.setFormatter(logging.Formatter(_LOG_FORMAT, datefmt=_DATE_FORMAT))
+    root.addHandler(file_handler)
 ```
 
 Each module creates its own logger: `logger = logging.getLogger(__name__)`.
