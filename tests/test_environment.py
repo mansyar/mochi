@@ -292,9 +292,12 @@ class TestSurfaceListBuilder:
         win = _make_mock_window(title="Test", left=100, top=200, width=800, height=600)
         surfaces = poller._build_surfaces([win])
         for s in surfaces:
-            if s.surface_type != "screen_bottom":
-                # mock window doesn't have a real handle, so it'll be None
-                pass
+            if s.surface_type in ("window_top", "window_left", "window_right"):
+                # Mock window has no getHandle; window_id should be None
+                assert s.window_id is None, f"Expected None for {s.surface_type}"
+            elif s.surface_type in ("screen_bottom", "screen_left", "screen_right"):
+                # Screen edges always have window_id=None
+                assert s.window_id is None, f"Expected None for {s.surface_type}"
 
 
 class TestSurfaceReexport:
