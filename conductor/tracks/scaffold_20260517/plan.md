@@ -53,14 +53,14 @@
     - [x] Test that log file is actually written
 - [x] Run tests and confirm they fail — **Red Phase**
 
-### Task 0.6: Implement logger.py
-- [ ] Create `src/mochi/utils/logger.py` with `setup_logging(debug: bool = False) -> None` function
-- [ ] Configure logging with timestamp, level, name, message format
-- [ ] Add StreamHandler (stdout) and FileHandler ("mochi.log")
-- [ ] Use DEBUG level when debug=True, INFO otherwise
-- [ ] Run tests and confirm they pass — **Green Phase**
-- [ ] Run `uv run ruff check src/` — zero lint errors
-- [ ] Run `uv run mypy src/mochi/` — zero type errors
+### Task 0.6: Implement logger.py `ac65c63`
+- [x] Create `src/mochi/utils/logger.py` with `setup_logging(debug: bool = False) -> None` function
+- [x] Configure logging with timestamp, level, name, message format
+- [x] Add StreamHandler (stdout) and FileHandler ("mochi.log")
+- [x] Use DEBUG level when debug=True, INFO otherwise
+- [x] Run tests and confirm they pass — **Green Phase**
+- [x] Run `uv run ruff check src/` — zero lint errors
+- [x] Run `uv run mypy src/mochi/` — zero type errors (pending main.py)
 
 ### Task 0.7: Write tests for platform.py
 - [ ] Write `tests/test_platform.py`:
