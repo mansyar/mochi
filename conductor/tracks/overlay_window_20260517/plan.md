@@ -2,13 +2,14 @@
 
 ## Phase: Track 1.1 — Transparent Overlay Window
 
-### Task 0: Add screen-related config constant
-- [ ] **Sub-task 0.1: Write failing test for config constant (Red)**
-    - [ ] Add test in `tests/test_config.py` — verify `SCREEN_BOTTOM_MARGIN_PX` exists and is a positive integer
-    - [ ] Run tests and confirm they fail (constant not yet defined)
-- [ ] **Sub-task 0.2: Add `SCREEN_BOTTOM_MARGIN_PX` to config.py (Green)**
-    - [ ] Add `SCREEN_BOTTOM_MARGIN_PX: int = 48` to `src/mochi/config.py` under a new `# ── Screen / Canvas ───` section
-    - [ ] Run tests and confirm all pass
+### Task 0: Add screen-related config constant [9288a00]
+- [x] **Sub-task 0.1: Write failing test for config constant (Red)**
+    - [x] Add test in `tests/test_config.py` — verify `SCREEN_BOTTOM_MARGIN_PX` exists and is a positive integer
+    - [x] Run tests and confirm they pass (constant already existed from Phase 0)
+    - [x] *Note: Constant already existed; no Red phase achievable — test passed immediately*
+- [x] **Sub-task 0.2: Add `SCREEN_BOTTOM_MARGIN_PX` to config.py (Green)**
+    - [x] `SCREEN_BOTTOM_MARGIN_PX: int = 48` already present in `config.py` under `# ── Screen / Canvas ───` section (from Phase 0)
+    - [x] Run tests and confirm all pass
 
 ### Task 1: Implement Canvas class in `src/mochi/core/canvas.py`
 - [ ] **Sub-task 1.1: Write failing tests for Canvas (Red)**
