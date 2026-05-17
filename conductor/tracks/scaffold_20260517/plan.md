@@ -15,13 +15,13 @@
 - [x] Run `uv sync --extra dev` to create .venv and install all dependencies
 - [x] Verify: `uv.lock` is generated and committed to version control
 
-### Task 0.2: Create project directory structure
-- [ ] Create directories: `src/mochi/`, `src/mochi/models/`, `src/mochi/core/`, `src/mochi/ui/`, `src/mochi/utils/`, `tests/`, `assets/sprites/`
-- [ ] Create `__init__.py` in each Python package directory (src/mochi, models, core, ui, utils)
-- [ ] Create empty `tests/__init__.py` for pytest discovery
-- [ ] Create placeholder `assets/sprites/.gitkeep` to preserve the directory
-- [ ] Create `src/mochi/__main__.py` as a minimal `python -m mochi` entry point (stub that imports `main` — will be completed in Task 0.10)
-- [ ] Verify: `uv run python -c "import mochi"` succeeds with no errors
+### Task 0.2: Create project directory structure `0eab6b3`
+- [x] Create directories: `src/mochi/`, `src/mochi/models/`, `src/mochi/core/`, `src/mochi/ui/`, `src/mochi/utils/`, `tests/`, `assets/sprites/`
+- [x] Create `__init__.py` in each Python package directory (src/mochi, models, core, ui, utils)
+- [x] Create empty `tests/__init__.py` for pytest discovery
+- [x] Create placeholder `assets/sprites/.gitkeep` to preserve the directory
+- [x] Create `src/mochi/__main__.py` as a minimal `python -m mochi` entry point (stub that imports `main` — will be completed in Task 0.10)
+- [x] Verify: `uv run python -c "import mochi"` succeeds with no errors
 
 ### Task 0.3: Write tests for config.py
 - [ ] Write `tests/test_config.py`:
