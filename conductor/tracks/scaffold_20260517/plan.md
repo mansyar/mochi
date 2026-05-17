@@ -2,18 +2,18 @@
 
 ## Phase 0: Project Foundation
 
-### Task 0.1: Initialize pyproject.toml and install dependencies
-- [ ] Create `pyproject.toml` with project name "mochi", version "1.0.0", Python >= 3.11
-- [ ] Add runtime dependencies: PySide6-Essentials >= 6.7, < 7.0; pywinctl >= 0.4, < 1.0; pymonctl >= 0.4, < 1.0
-- [ ] Add dev dependencies: pytest >= 8.0, pytest-qt >= 4.4, pytest-cov >= 6.0, pytest-xdist >= 3.5, mypy >= 1.13, PyInstaller >= 6.0
-- [ ] Add release dependencies: Nuitka >= 2.0
-- [ ] Configure Ruff lint: target-version py311, line-length 100, src = ["src"], select = [E, W, F, I, N, UP, B, SIM, RUF], isort known-first-party = ["mochi"]
-- [ ] Configure Ruff format: line-length 100 (inherits from parent), docstring-code-format = true
-- [ ] Configure mypy: strict mode, python_version 3.11, ignore missing imports for pywinctl and pymonctl
-- [ ] Configure pytest: testpaths = ["tests"], qt_api = "pyside6", addopts with coverage
-- [ ] Configure coverage: source = ["src/mochi"], omit __main__.py
-- [ ] Run `uv sync --extra dev` to create .venv and install all dependencies
-- [ ] Verify: `uv.lock` is generated and committed to version control
+### Task 0.1: Initialize pyproject.toml and install dependencies `4bf3da6`
+- [x] Create `pyproject.toml` with project name "mochi", version "1.0.0", Python >= 3.11
+- [x] Add runtime dependencies: PySide6-Essentials >= 6.7, < 7.0; pywinctl >= 0.4, < 1.0; pymonctl >= 0.4, < 1.0
+- [x] Add dev dependencies: pytest >= 8.0, pytest-qt >= 4.4, pytest-cov >= 6.0, pytest-xdist >= 3.5, mypy >= 1.13, ruff >= 0.9.0, PyInstaller >= 6.0
+- [x] Add release dependencies: Nuitka >= 2.0
+- [x] Configure Ruff lint: target-version py311, line-length 100, src = ["src"], select = [E, W, F, I, N, UP, B, SIM, RUF], isort known-first-party = ["mochi"]
+- [x] Configure Ruff format: line-length 100 (inherits from parent), docstring-code-format = true
+- [x] Configure mypy: strict mode, python_version 3.11, ignore missing imports for pywinctl and pymonctl
+- [x] Configure pytest: testpaths = ["tests"], qt_api = "pyside6", addopts with coverage
+- [x] Configure coverage: source = ["src/mochi"], omit __main__.py
+- [x] Run `uv sync --extra dev` to create .venv and install all dependencies
+- [x] Verify: `uv.lock` is generated and committed to version control
 
 ### Task 0.2: Create project directory structure
 - [ ] Create directories: `src/mochi/`, `src/mochi/models/`, `src/mochi/core/`, `src/mochi/ui/`, `src/mochi/utils/`, `tests/`, `assets/sprites/`
