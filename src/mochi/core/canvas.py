@@ -136,6 +136,9 @@ class Canvas(QWidget):
         self._fsm.tick(dt)
         current_state = self._fsm.current_state
 
+        # 2.5 Sync physics direction from FSM (FSM owns direction reversal)
+        self._physics.direction = self._fsm.direction
+
         # 3. Update physics (horizontal movement)
         geo = self._screen_geo
         screen_width = geo.width() if geo is not None else 1920
