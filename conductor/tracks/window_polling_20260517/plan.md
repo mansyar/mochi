@@ -4,9 +4,9 @@
 
 - [x] Task: Update `WINDOW_POLL_INTERVAL_MS` in `config.py` from 200 → 300 [f404ce1]
     - [x] Add `TestPollingConstants` class in `test_config.py` to validate the constant value and type
-- [ ] Task: Create `Surface` dataclass in `src/mochi/core/environment.py`
-    - [ ] Write tests: `test_environment.py` — Surface has correct fields (`rect: QRect`, `surface_type: str`, `window_id: int | None`), defaults, and `@dataclass` behavior
-    - [ ] Implement `@dataclass` with all three fields
+- [x] Task: Create `Surface` dataclass in `src/mochi/core/environment.py` [8db926e]
+    - [x] Write tests: `test_environment.py` — Surface has correct fields (`rect: QRect`, `surface_type: str`, `window_id: int | None`), defaults, and `@dataclass` behavior
+    - [x] Implement `@dataclass` with all three fields
 - [ ] Task: Update `src/mochi/core/__init__.py` to export `Surface`
 
 ## Phase 2: EnvironmentPoller (QThread + Polling Loop)
