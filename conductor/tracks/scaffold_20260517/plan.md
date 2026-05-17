@@ -80,7 +80,7 @@
 - [x] Run `uv run ruff check src/` — zero lint errors
 - [x] Run `uv run mypy src/mochi/` — zero type errors (pending main.py)
 
-### Task 0.9: Write tests for main.py and __main__.py
+### Task 0.9: Write tests for main.py and __main__.py `a4fb895`
 - [x] Write `tests/test_main.py`:
     - [x] Test that main module's `create_application()` returns a QApplication instance
     - [x] Test that application name is set to "Mochi"
@@ -99,8 +99,8 @@
 - [x] Run `uv run ruff check src/` — zero lint errors
 - [x] Run `uv run mypy src/mochi/` — zero type errors (pending __main__.py)
 - [x] Verify: All modules import successfully, config constants accessible
-- [ ] Run `uv run ruff check src/` — zero lint errors
-- [ ] Run `uv run mypy src/mochi/` — zero type errors
+- [x] Run `uv run ruff check src/` — zero lint errors
+- [x] Run `uv run mypy src/mochi/` — zero type errors
 
 ### Task 0.11: Final tooling verification `703233f`
 - [x] Run full test suite: `uv run pytest` — all 43 tests pass (83% coverage)
@@ -116,3 +116,6 @@
     - [x] Run automated tests per Phase Completion Protocol
     - [x] Present manual verification plan to user
     - [x] Create checkpoint commit with auditable git notes
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions `69e44d2`
