@@ -7,7 +7,7 @@
 - [x] Task: Create `Surface` dataclass in `src/mochi/core/environment.py` [8db926e]
     - [x] Write tests: `test_environment.py` — Surface has correct fields (`rect: QRect`, `surface_type: str`, `window_id: int | None`), defaults, and `@dataclass` behavior
     - [x] Implement `@dataclass` with all three fields
-- [ ] Task: Update `src/mochi/core/__init__.py` to export `Surface`
+- [x] Task: Update `src/mochi/core/__init__.py` to export `Surface` [fe93478]
 
 ## Phase 2: EnvironmentPoller (QThread + Polling Loop)
 
