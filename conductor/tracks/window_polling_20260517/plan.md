@@ -17,10 +17,10 @@
 - [x] Task: Implement window enumeration and filtering [5ce01d3]
     - [x] Write tests: filters out minimized windows, empty-title windows, and "Mochi"-titled windows; includes visible windows; uses mocked `pywinctl` to avoid platform dependency
     - [x] Implement `_get_visible_windows()` — calls `pywinctl.getAllWindows()`, applies filters (minimized, empty title, title "Mochi")
-- [ ] Task: Implement surface list builder
-    - [ ] Write tests: given mock windows with known rects, produces correct `Surface` objects for all 6 types (`window_top`, `window_left`, `window_right`, `screen_bottom`, `screen_left`, `screen_right`)
-    - [ ] Write tests: `screen_bottom` Y coordinate matches `SCREEN_BOTTOM_MARGIN_PX + SPRITE_CELL_HEIGHT` formula (consistent with `Canvas._screen_bottom_y()`)
-    - [ ] Implement `_build_surfaces(windows) -> list[Surface]` — window tops, window left/right, screen edges from cached `screen_geo`
+- [x] Task: Implement surface list builder [b6ad5fe]
+    - [x] Write tests: given mock windows with known rects, produces correct `Surface` objects for all 6 types (`window_top`, `window_left`, `window_right`, `screen_bottom`, `screen_left`, `screen_right`)
+    - [x] Write tests: `screen_bottom` Y coordinate matches `SCREEN_BOTTOM_MARGIN_PX + SPRITE_CELL_HEIGHT` formula (consistent with `Canvas._screen_bottom_y()`)
+    - [x] Implement `_build_surfaces(windows) -> list[Surface]` — window tops, window left/right, screen edges from cached `screen_geo`
 - [ ] Task: Implement polling loop with QTimer
     - [ ] Write tests: verify `platforms_updated` signal emission on tick (use mocked `pywinctl` + `QTest.qWait`)
     - [ ] Implement `run()`: create `QTimer`, connect `timeout` → `_poll`, call `self.exec()` to start event loop
