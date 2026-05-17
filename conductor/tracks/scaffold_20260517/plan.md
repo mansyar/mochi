@@ -102,7 +102,7 @@
 - [ ] Run `uv run ruff check src/` — zero lint errors
 - [ ] Run `uv run mypy src/mochi/` — zero type errors
 
-### Task 0.11: Final tooling verification
+### Task 0.11: Final tooling verification `703233f`
 - [x] Run full test suite: `uv run pytest` — all 43 tests pass (83% coverage)
 - [x] Run linter: `uv run ruff check src/` — zero errors
 - [x] Run formatter check: `uv run ruff format --check src/` — zero formatting violations
@@ -111,8 +111,8 @@
 - [x] Verify application launches: all modules import successfully, Qt event loop verified
 - [x] Verify `uv.lock` is committed to version control
 
-### Task 0.12: Phase Completion Verification
-- [ ] Task: Conductor - User Manual Verification 'Phase 0: Project Foundation' (Protocol in workflow.md)
-    - [ ] Run automated tests per Phase Completion Protocol
-    - [ ] Present manual verification plan to user
-    - [ ] Create checkpoint commit with auditable git notes
+### Task 0.12: Phase Completion Verification [checkpoint: ]
+- [x] Task: Conductor - User Manual Verification 'Phase 0: Project Foundation' (Protocol in workflow.md)
+    - [x] Run automated tests per Phase Completion Protocol
+    - [x] Present manual verification plan to user
+    - [x] Create checkpoint commit with auditable git notes
