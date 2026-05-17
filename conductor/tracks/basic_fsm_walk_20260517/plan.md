@@ -83,3 +83,6 @@
     - [x] Run `uv run mypy src/mochi/` — zero type errors
     - [x] Run `uv run ruff format --check src/` — zero formatting violations
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Canvas Integration & Walk Animation' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions `98e213f`
