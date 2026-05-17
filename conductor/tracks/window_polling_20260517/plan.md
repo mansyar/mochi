@@ -48,3 +48,6 @@
 - [x] Task: Run full test suite — `uv run pytest` — all 153 pass, 1 skip [0a81910]
 - [x] Task: Run lint/type checks — `uv run ruff check src/` and `uv run mypy src/mochi/` — zero errors
 - [x] Task: Commit all changes with descriptive messages
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions — fix no-op test to add real assertions [a921e62]
