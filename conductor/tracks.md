@@ -26,5 +26,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Track 2.1 — Window Polling & Surface Detection**
+- [x] **Track: Track 2.1 — Window Polling & Surface Detection**
   *Link: [./tracks/window_polling_20260517/](./tracks/window_polling_20260517/)*
