@@ -1,6 +1,6 @@
 # Implementation Plan: Track 1.3 — Basic FSM + Walk on Screen Bottom
 
-## Phase 1: Core FSM Engine
+## Phase 1: Core FSM Engine [checkpoint: c367b0d]
 
 > **Goal:** Create the `FSM` class with Idle/Walk/EdgePause states and timer-based transitions, fully tested.
 
@@ -20,7 +20,7 @@
     - [x] Add same-state transition guard (no-op on duplicate)
     - [x] Add DEBUG-level logging for state transitions
     - [x] Run tests: confirm all pass (Green phase)
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Core FSM Engine' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Core FSM Engine' (Protocol in workflow.md) `c367b0d`
 
 ## Phase 2: Core Physics Engine
 
