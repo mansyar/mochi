@@ -14,9 +14,9 @@
 - [x] Task: Implement `EnvironmentPoller(QThread)` skeleton [b50b9c0]
     - [x] Write tests: `test_environment.py` — class exists, is `QThread` subclass, has `platforms_updated = Signal(list)`, accepts `screen_geo: QRect` in `__init__`
     - [x] Implement class skeleton: `QThread` subclass with `platforms_updated = Signal(list)`, store `screen_geo` from constructor
-- [ ] Task: Implement window enumeration and filtering
-    - [ ] Write tests: filters out minimized windows, empty-title windows, and "Mochi"-titled windows; includes visible windows; uses mocked `pywinctl` to avoid platform dependency
-    - [ ] Implement `_get_visible_windows()` — calls `pywinctl.getAllWindows()`, applies filters (minimized, empty title, title "Mochi")
+- [x] Task: Implement window enumeration and filtering [5ce01d3]
+    - [x] Write tests: filters out minimized windows, empty-title windows, and "Mochi"-titled windows; includes visible windows; uses mocked `pywinctl` to avoid platform dependency
+    - [x] Implement `_get_visible_windows()` — calls `pywinctl.getAllWindows()`, applies filters (minimized, empty title, title "Mochi")
 - [ ] Task: Implement surface list builder
     - [ ] Write tests: given mock windows with known rects, produces correct `Surface` objects for all 6 types (`window_top`, `window_left`, `window_right`, `screen_bottom`, `screen_left`, `screen_right`)
     - [ ] Write tests: `screen_bottom` Y coordinate matches `SCREEN_BOTTOM_MARGIN_PX + SPRITE_CELL_HEIGHT` formula (consistent with `Canvas._screen_bottom_y()`)
