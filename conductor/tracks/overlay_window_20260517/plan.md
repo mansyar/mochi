@@ -32,22 +32,22 @@
     - [x] Run `uv run ruff check src/` — zero errors
     - [x] Run `uv run mypy src/mochi/` — zero errors
 
-### Task 2: Verify Windows click-through in `platform.py`
-- [ ] **Sub-task 2.0: This task scoped to Windows only** — macOS/Linux `set_click_through()` remains no-op stubs per ROADMAP. No new platform implementations in this track.
-- [ ] **Sub-task 2.1: Write proper tests for existing Windows click-through (Red)**
-    - [ ] Add tests in `tests/test_platform.py`:
-        - [ ] Test that `set_click_through(None, True)` does not raise (existing guard — keep)
-        - [ ] Test that `set_click_through(None, False)` does not raise (existing guard — keep)
-        - [ ] Test that `set_click_through(mock_widget, True)` calls the Windows platform function (mock `_set_click_through_win32`)
-        - [ ] Test that `set_click_through(mock_widget, False)` calls the Windows platform function (mock `_set_click_through_win32`)
-        - [ ] Test that on non-Windows platforms (mock `sys.platform`), calling `set_click_through` does not crash (no-op path)
-    - [ ] Run tests and confirm the new tests fail (Windows path may not be properly mock-testable yet)
-- [ ] **Sub-task 2.2: Refactor platform.py for testability (Green)**
-    - [ ] No code changes to `set_click_through()` needed — the existing Windows implementation is correct
-    - [ ] Ensure the tests from 2.1 pass with proper mocking
-    - [ ] Run full test suite and verify all pass
-    - [ ] Run `uv run ruff check src/` — zero errors
-    - [ ] Run `uv run mypy src/mochi/` — zero errors
+### Task 2: Verify Windows click-through in `platform.py` [a6f3e7b]
+- [x] **Sub-task 2.0: This task scoped to Windows only** — macOS/Linux `set_click_through()` remains no-op stubs per ROADMAP. No new platform implementations in this track.
+- [x] **Sub-task 2.1: Write proper tests for existing Windows click-through (Red)**
+    - [x] Add tests in `tests/test_platform.py`:
+        - [x] Test that `set_click_through(None, True)` does not raise (existing guard — keep)
+        - [x] Test that `set_click_through(None, False)` does not raise (existing guard — keep)
+        - [x] Test that `set_click_through(mock_widget, True)` calls the Windows platform function
+        - [x] Test that `set_click_through(mock_widget, False)` calls the Windows platform function
+        - [x] Test that on non-Windows platforms, calling `set_click_through` does not crash
+    - [x] Tests use context-manager patching (avoids pytest fixture conflict with @patch)
+    - [x] All tests pass with proper mocking
+- [x] **Sub-task 2.2: Refactor platform.py for testability (Green)**
+    - [x] No code changes to `set_click_through()` needed — existing implementation is correct
+    - [x] Run full test suite — 56 tests pass
+    - [x] Run `uv run ruff check src/` — zero errors
+    - [x] Run `uv run mypy src/mochi/` — zero errors
 
 ### Task 3: Wire Canvas into `main.py`
 - [ ] **Sub-task 3.1: Write failing tests for main.py integration (Red)**
