@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 from PySide6.QtCore import QRect, QThread, Signal
 
 from mochi.core.environment import EnvironmentPoller, Surface
@@ -131,6 +133,48 @@ def _make_mock_window(
         width=width,
         height=height,
     )
+
+
+class TestErrorResilience:
+    """EnvironmentPoller must handle errors gracefully."""
+
+    def test_pywinctl_raise_reemits_cached(self) -> None:
+        """If pywinctl.getAllWindows() raises, the cached list should be re-emitted."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        # Prime the cache with a known set of surfaces
+        poller._cached_surfaces = [
+            Surface(rect=QRect(0, 0, 100, 0), surface_type="screen_bottom", window_id=None),
+        ]
+        results: list[list[Surface]] = []
+
+        def _capture(surfaces: list[Surface]) -> None:
+            results.append(surfaces)
+
+        poller.platforms_updated.connect(_capture)
+
+        with patch("pywinctl.getAllWindows", side_effect=RuntimeError("permission denied")):
+            poller._poll()
+
+        assert len(results) == 1
+        assert len(results[0]) == 1
+        assert results[0][0].surface_type == "screen_bottom"
+
+    def test_error_on_first_poll_emits_empty_list(self) -> None:
+        """If first poll fails and cache is empty, an empty list should be emitted."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        results: list[list[Surface]] = []
+
+        def _capture(surfaces: list[Surface]) -> None:
+            results.append(surfaces)
+
+        poller.platforms_updated.connect(_capture)
+
+        with patch("pywinctl.getAllWindows", side_effect=PermissionError("access denied")):
+            poller._poll()
+
+        assert len(results) == 1
+        # Empty cache on first error → empty list emitted
+        assert len(results[0]) == 0
 
 
 class TestPollingLoop:
