@@ -18,3 +18,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - ~~[x] **Track: Track 1.2 — Sprite Loading & Idle Animation**~~
   ~~*Link: [./archive/sprite_idle_20260517/](./archive/sprite_idle_20260517/)*~~
+
+---
+
+- [ ] **Track: Track 1.3 — Basic FSM + Walk on Screen Bottom**
+  *Link: [./tracks/basic_fsm_walk_20260517/](./tracks/basic_fsm_walk_20260517/)*
