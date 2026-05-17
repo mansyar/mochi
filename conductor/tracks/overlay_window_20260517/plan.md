@@ -72,3 +72,6 @@
 
 ### Task 5: Phase Completion Verification
 - [x] Task: Conductor - User Manual Verification 'Track 1.1 — Transparent Overlay Window' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions [382c637]
