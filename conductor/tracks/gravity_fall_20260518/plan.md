@@ -72,7 +72,7 @@
 
 **Goal:** Integrate Fall state, gravity physics, fall sprite (from JUMP.png middle frame), and landing into the Canvas animation loop with correct tick ordering.
 
-- [ ] Task: Write Canvas integration tests for Fall
+- [~] Task: Write Canvas integration tests for Fall
     - [ ] `test_canvas.py`: `_advance_frame` transitions to Fall when surface is lost (mock surfaces)
     - [ ] `test_canvas.py`: `_advance_frame` transitions to Idle when landing detected
     - [ ] `test_canvas.py`: Fall sprite key is used when state is Fall

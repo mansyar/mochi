@@ -32,6 +32,7 @@ _TICK_INTERVALS: dict[PetState, int] = {
     PetState.Idle: 250,
     PetState.Walk: 100,
     PetState.EdgePause: 250,
+    PetState.Fall: 100,
 }
 
 #: Sprite animation key lookup per FSM state.
@@ -39,6 +40,7 @@ _SPRITE_KEYS: dict[PetState, str] = {
     PetState.Idle: "idle",
     PetState.Walk: "walk",
     PetState.EdgePause: "walk",
+    PetState.Fall: "fall",
 }
 
 
@@ -70,9 +72,19 @@ class Canvas(QWidget):
 
         # ── Sprite sheet loading ──────────────────────────────────────────
         self._spritesheet: SpriteSheet = SpriteSheet("sprites/")
+
+        # Load fall sprite from JUMP.png middle frame (index 1)
+        jump_frames = self._spritesheet.load("jump")
+        if len(jump_frames) >= 2:
+            fall_frames: list[QPixmap] = [jump_frames[1]]
+        else:
+            logger.warning("JUMP.png has fewer than 2 frames — fall sprite unavailable")
+            fall_frames = []
+
         self._animations: dict[str, list[QPixmap]] = {
             "idle": self._spritesheet.load("idle"),
             "walk": self._spritesheet.load("walk"),
+            "fall": fall_frames,
         }
         self._current_frame: int = 0
         self._current_sprite_key: str = "idle"
@@ -104,13 +116,14 @@ class Canvas(QWidget):
         self._animation_timer.start()
 
         logger.info(
-            "Canvas created: %dx%d at (%d, %d), frames: idle=%d walk=%d",
+            "Canvas created: %dx%d at (%d, %d), frames: idle=%d walk=%d fall=%d",
             self.width(),
             self.height(),
             self.x(),
             self.y(),
             len(self._animations.get("idle", [])),
             len(self._animations.get("walk", [])),
+            len(self._animations.get("fall", [])),
         )
 
     # ── Public helpers ──────────────────────────────────────────────────
@@ -169,25 +182,27 @@ class Canvas(QWidget):
         return 0
 
     def _advance_frame(self) -> None:
-        """Animation tick: advance FSM, physics, and sprite frame.
+        """Animation tick: advance physics, FSM, and sprite frame.
 
         Called by the ``QTimer`` at a state-dependent interval.
+
+        **Critical ordering:** physics runs BEFORE the FSM tick to prevent
+        Walk→Idle timer transitions from masking surface-loss detection.
+        Fall state has ``float('inf')`` timer so it never auto-transitions
+        via the timer — transitions are purely physics-driven.
         """
         # 1. Compute dt (frame-rate independent)
         now = time.monotonic()
         dt = now - self._last_tick
         self._last_tick = now
 
-        # 2. Tick the FSM (timer-based state transitions)
-        self._fsm.tick(dt)
-        current_state = self._fsm.current_state
-
-        # 2.5 Sync physics direction from FSM (FSM owns direction reversal)
+        # 2. Sync physics direction from FSM (FSM owns direction reversal)
         # Note: ``x`` is the sprite's **left edge** in both directions
         # (see ``paintEvent``), so no position adjustment is needed on flip.
+        current_state = self._fsm.current_state
         self._physics.direction = self._fsm.direction
 
-        # 3. Update physics (horizontal movement, gravity, landing)
+        # 3. Update physics with surface awareness
         geo = self._screen_geo
         screen_width = geo.width() if geo is not None else 1920
         result = self._physics.update(
@@ -195,31 +210,52 @@ class Canvas(QWidget):
             current_state,
             screen_width=screen_width,
             sprite_width=config.SPRITE_CELL_WIDTH,
+            surfaces=self._surfaces,
         )
 
-        # 4. Handle edge-hit: transition to EdgePause
+        # 4. Handle surface-loss: Walk → Fall
+        if result.surface_lost and current_state is PetState.Walk:
+            self._fsm.transition_to(PetState.Fall)
+            current_state = self._fsm.current_state
+
+        # 5. Handle landing: Fall → Idle
+        if result.landed and current_state is PetState.Fall:
+            self._fsm.transition_to(PetState.Idle)
+            current_state = self._fsm.current_state
+
+        # 6. Tick the FSM (timer-based state transitions)
+        # Safe: Fall has inf timer, won't auto-transition.
+        self._fsm.tick(dt)
+        current_state = self._fsm.current_state
+
+        # 7. Handle edge-hit: transition to EdgePause
         if result.edge_hit and current_state is PetState.Walk:
             self._fsm.transition_to(PetState.EdgePause)
+            current_state = self._fsm.current_state
 
-        # 5. Determine sprite key from state
+        # 8. Determine sprite key from state
         new_key = _SPRITE_KEYS.get(current_state, "idle")
 
-        # 6. Swap sprite animation if key changed
+        # 9. Swap sprite animation if key changed
         if new_key != self._current_sprite_key:
             self._current_sprite_key = new_key
             self._current_frame = 0
 
-        # 7. Advance frame index
+        # 10. Advance frame index
         frames = self._animations.get(self._current_sprite_key, [])
-        if not frames and self._current_sprite_key == "walk":
-            logger.warning("No walk frames loaded — cat will be invisible during Walk state")
+        if not frames and self._current_sprite_key in ("walk", "fall"):
+            logger.warning(
+                "No %s frames loaded — cat will be invisible during %s state",
+                self._current_sprite_key,
+                current_state,
+            )
         if frames:
             self._current_frame = (self._current_frame + 1) % len(frames)
 
-        # 8. Adapt timer interval to current state
+        # 11. Adapt timer interval to current state
         self._animation_timer.setInterval(_TICK_INTERVALS.get(current_state, 250))
 
-        # 9. Request repaint
+        # 12. Request repaint
         self.update()
 
     def paintEvent(self, event: object) -> None:  # noqa: N802
