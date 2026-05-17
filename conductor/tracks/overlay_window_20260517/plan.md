@@ -1,6 +1,6 @@
 # Implementation Plan: Track 1.1 — Transparent Overlay Window
 
-## Phase: Track 1.1 — Transparent Overlay Window
+## Phase: Track 1.1 — Transparent Overlay Window [checkpoint: bca2e0b]
 
 ### Task 0: Add screen-related config constant [9288a00]
 - [x] **Sub-task 0.1: Write failing test for config constant (Red)**
@@ -71,4 +71,4 @@
 - [x] Verify coverage meets requirements — 93% overall (above 80% target)
 
 ### Task 5: Phase Completion Verification
-- [ ] Task: Conductor - User Manual Verification 'Track 1.1 — Transparent Overlay Window' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Track 1.1 — Transparent Overlay Window' (Protocol in workflow.md)
