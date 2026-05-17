@@ -63,6 +63,85 @@ class EnvironmentPoller(QThread):
         #: Cached surface list from the last successful poll (for error fallback).
         self._cached_surfaces: list[Surface] = []
 
+    def _build_surfaces(self, windows: list[Any]) -> list[Surface]:
+        """Build a list of ``Surface`` objects from filtered windows and screen edges.
+
+        For each visible window, produces ``window_top``, ``window_left``,
+        and ``window_right`` surfaces.  Screen edge surfaces (bottom, left,
+        right) are always included.
+
+        Parameters
+        ----------
+        windows : list[Any]
+            Filtered list of visible pywinctl windows.
+
+        Returns
+        -------
+        list[Surface]
+            All walkable/grabbable surfaces on the desktop.
+        """
+        from mochi import config
+
+        surfaces: list[Surface] = []
+        s = self._screen_geo
+
+        # ── Window surfaces ────────────────────────────────────────────
+        for w in windows:
+            x = getattr(w, "left", 0) or 0
+            y = getattr(w, "top", 0) or 0
+            ww = getattr(w, "width", 0) or 0
+            wh = getattr(w, "height", 0) or 0
+            handle = getattr(w, "getHandle", None)
+            wid: int | None = int(handle()) if callable(handle) else None  # type: ignore[arg-type]
+
+            surfaces.append(
+                Surface(
+                    rect=QRect(x, y, ww, 0),
+                    surface_type="window_top",
+                    window_id=wid,
+                )
+            )
+            surfaces.append(
+                Surface(
+                    rect=QRect(x, y, 0, wh),
+                    surface_type="window_left",
+                    window_id=wid,
+                )
+            )
+            surfaces.append(
+                Surface(
+                    rect=QRect(x + ww, y, 0, wh),
+                    surface_type="window_right",
+                    window_id=wid,
+                )
+            )
+
+        # ── Screen edge surfaces ───────────────────────────────────────
+        bottom_y = s.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - config.SPRITE_CELL_HEIGHT
+        surfaces.append(
+            Surface(
+                rect=QRect(0, bottom_y, s.width(), 0),
+                surface_type="screen_bottom",
+                window_id=None,
+            )
+        )
+        surfaces.append(
+            Surface(
+                rect=QRect(0, 0, 0, s.height()),
+                surface_type="screen_left",
+                window_id=None,
+            )
+        )
+        surfaces.append(
+            Surface(
+                rect=QRect(s.width(), 0, 0, s.height()),
+                surface_type="screen_right",
+                window_id=None,
+            )
+        )
+
+        return surfaces
+
     @staticmethod
     def _get_visible_windows(windows: list[Any]) -> list[Any]:
         """Filter a list of pywinctl windows to only visible, valid ones.

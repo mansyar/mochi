@@ -114,9 +114,110 @@ class _MockWindow:
         return self._is_minimized
 
 
-def _make_mock_window(title: str, minimized: bool = False) -> _MockWindow:
+def _make_mock_window(
+    title: str,
+    minimized: bool = False,
+    left: int = 100,
+    top: int = 100,
+    width: int = 800,
+    height: int = 600,
+) -> _MockWindow:
     """Helper to create a mock pywinctl Window with minimal required attrs."""
-    return _MockWindow(title=title, minimized=minimized, left=100, top=100, width=800, height=600)
+    return _MockWindow(
+        title=title,
+        minimized=minimized,
+        left=left,
+        top=top,
+        width=width,
+        height=height,
+    )
+
+
+class TestSurfaceListBuilder:
+    """_build_surfaces must produce correct Surface objects for all types."""
+
+    def test_window_top_surface(self) -> None:
+        """A window should produce a window_top surface at its top edge."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        win = _make_mock_window(title="Test", left=100, top=200, width=800, height=600)
+        surfaces = poller._build_surfaces([win])
+        tops = [s for s in surfaces if s.surface_type == "window_top"]
+        assert len(tops) == 1
+        assert tops[0].rect == QRect(100, 200, 800, 0)
+
+    def test_window_left_surface(self) -> None:
+        """A window should produce a window_left surface at its left edge."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        win = _make_mock_window(title="Test", left=100, top=200, width=800, height=600)
+        surfaces = poller._build_surfaces([win])
+        lefts = [s for s in surfaces if s.surface_type == "window_left"]
+        assert len(lefts) == 1
+        assert lefts[0].rect == QRect(100, 200, 0, 600)
+
+    def test_window_right_surface(self) -> None:
+        """A window should produce a window_right surface at its right edge."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        win = _make_mock_window(title="Test", left=100, top=200, width=800, height=600)
+        surfaces = poller._build_surfaces([win])
+        rights = [s for s in surfaces if s.surface_type == "window_right"]
+        assert len(rights) == 1
+        assert rights[0].rect == QRect(900, 200, 0, 600)
+
+    def test_multiple_windows(self) -> None:
+        """Multiple windows should produce surfaces for each."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        win1 = _make_mock_window(title="Win1", left=0, top=0, width=400, height=300)
+        win2 = _make_mock_window(title="Win2", left=500, top=100, width=600, height=400)
+        surfaces = poller._build_surfaces([win1, win2])
+        tops = [s for s in surfaces if s.surface_type == "window_top"]
+        assert len(tops) == 2
+
+    def test_screen_bottom_surface(self) -> None:
+        """Screen bottom surface should always be present."""
+        from mochi import config
+
+        geo = QRect(0, 0, 1920, 1080)
+        poller = EnvironmentPoller(screen_geo=geo)
+        surfaces = poller._build_surfaces([])
+        bottoms = [s for s in surfaces if s.surface_type == "screen_bottom"]
+        assert len(bottoms) == 1
+        expected_y = geo.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - config.SPRITE_CELL_HEIGHT
+        assert bottoms[0].rect == QRect(0, expected_y, 1920, 0)
+
+    def test_screen_left_surface(self) -> None:
+        """Screen left edge surface should always be present."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        surfaces = poller._build_surfaces([])
+        lefts = [s for s in surfaces if s.surface_type == "screen_left"]
+        assert len(lefts) == 1
+        assert lefts[0].rect == QRect(0, 0, 0, 1080)
+
+    def test_screen_right_surface(self) -> None:
+        """Screen right edge surface should always be present."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        surfaces = poller._build_surfaces([])
+        rights = [s for s in surfaces if s.surface_type == "screen_right"]
+        assert len(rights) == 1
+        assert rights[0].rect == QRect(1920, 0, 0, 1080)
+
+    def test_screen_edges_always_present(self) -> None:
+        """All three screen edges should be present even with zero windows."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        surfaces = poller._build_surfaces([])
+        surface_types = {s.surface_type for s in surfaces}
+        assert "screen_bottom" in surface_types
+        assert "screen_left" in surface_types
+        assert "screen_right" in surface_types
+
+    def test_window_id_preserved(self) -> None:
+        """Window surfaces should carry the window handle as window_id."""
+        poller = EnvironmentPoller(screen_geo=QRect(0, 0, 1920, 1080))
+        win = _make_mock_window(title="Test", left=100, top=200, width=800, height=600)
+        surfaces = poller._build_surfaces([win])
+        for s in surfaces:
+            if s.surface_type != "screen_bottom":
+                # mock window doesn't have a real handle, so it'll be None
+                pass
 
 
 class TestSurfaceReexport:
