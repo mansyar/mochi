@@ -7,6 +7,16 @@ from PySide6.QtCore import QRect
 from mochi.core.environment import Surface
 
 
+class TestSurfaceReexport:
+    """Surface must be re-exported from mochi.core."""
+
+    def test_surface_importable_from_core(self) -> None:
+        """Surface should be importable from mochi.core."""
+        from mochi.core import Surface as SurfaceAlias
+
+        assert SurfaceAlias is not None
+
+
 class TestSurfaceDataclass:
     """Surface dataclass must have correct fields, types, and defaults."""
 
