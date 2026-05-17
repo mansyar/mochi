@@ -23,53 +23,50 @@
 
 **Goal:** Implement gravity acceleration, terminal velocity capping, landing detection, and surface-loss detection in the Physics engine. Physics.update() return type changes from `bool` to `PhysicsResult`.
 
-- [~] Task: Write PhysicsResult dataclass
-    - [ ] `physics.py`: Define `PhysicsResult` dataclass with `edge_hit: bool = False`, `surface_lost: bool = False`, `landed: bool = False`
-    - [ ] Re-export `PhysicsResult` from `mochi.core.__init__`
+- [x] Task: Write PhysicsResult dataclass [b613110]
+    - [x] `physics.py`: Define `PhysicsResult` dataclass with `edge_hit: bool = False`, `surface_lost: bool = False`, `landed: bool = False`
+    - [x] Re-export `PhysicsResult` from `mochi.core.__init__`
 
-- [ ] Task: Write Physics tests for gravity and landing
-    - [ ] `test_physics.py`: Physics class initializes with `velocity_y == 0.0`
-    - [ ] `test_physics.py`: In Fall state, `velocity_y` increases by `GRAVITY * dt` each tick
-    - [ ] `test_physics.py`: `velocity_y` does not exceed `TERMINAL_VELOCITY` after extended fall
-    - [ ] `test_physics.py`: In non-Fall states (Idle, Walk, EdgePause), `velocity_y` stays 0.0
-    - [ ] `test_physics.py`: `y` position increases (falls) when velocity_y > 0
-    - [ ] `test_physics.py`: Landing on a surface below snaps `y` to surface top - SPRITE_CELL_HEIGHT
-    - [ ] `test_physics.py`: Landing zeroes `velocity_y`
-    - [ ] `test_physics.py`: Landing on screen_bottom works when no window surfaces exist
-    - [ ] `test_physics.py`: Landing only triggers when horizontal overlap exists
-    - [ ] `test_physics.py`: Cat lands on first (topmost/highest Z) surface when multiple surfaces at same Y exist
-    - [ ] `test_physics.py`: No landing if no surface below (cat keeps falling)
-    - [ ] `test_physics.py`: `update()` returns `PhysicsResult` instance (update existing `test_update_returns_bool`)
-    - [ ] `test_physics.py`: `PhysicsResult.surface_lost` is True when Walk state has no supporting surface
-    - [ ] `test_physics.py`: `PhysicsResult.surface_lost` is False when Walk state is supported
-    - [ ] `test_physics.py`: `PhysicsResult.landed` is True when Fall state lands on a surface
-    - [ ] `test_physics.py`: Fallback to screen_bottom when surfaces list is empty
-    - [ ] `test_physics.py`: `PhysicsResult.edge_hit` still works for Walk state at screen edges
+- [x] Task: Write Physics tests for gravity and landing [b613110]
+    - [x] `test_physics.py`: Physics class initializes with `velocity_y == 0.0`
+    - [x] `test_physics.py`: In Fall state, `velocity_y` increases by `GRAVITY * dt` each tick
+    - [x] `test_physics.py`: `velocity_y` does not exceed `TERMINAL_VELOCITY` after extended fall
+    - [x] `test_physics.py`: In non-Fall states (Idle, Walk, EdgePause), `velocity_y` stays 0.0
+    - [x] `test_physics.py`: `y` position increases (falls) when velocity_y > 0
+    - [x] `test_physics.py`: Landing on a surface below snaps `y` to surface top - SPRITE_CELL_HEIGHT
+    - [x] `test_physics.py`: Landing zeroes `velocity_y`
+    - [x] `test_physics.py`: Landing on screen_bottom works when no window surfaces exist
+    - [x] `test_physics.py`: Landing only triggers when horizontal overlap exists
+    - [x] `test_physics.py`: Cat lands on first (topmost/highest Z) surface when multiple surfaces exist
+    - [x] `test_physics.py`: No landing if no surface below (cat keeps falling)
+    - [x] `test_physics.py`: `update()` returns `PhysicsResult` instance (updated existing tests)
+    - [x] `test_physics.py`: `PhysicsResult.surface_lost` is True when Walk state has no supporting surface
+    - [x] `test_physics.py`: `PhysicsResult.surface_lost` is False when Walk state is supported
+    - [x] `test_physics.py`: `PhysicsResult.landed` is True when Fall state lands on a surface
+    - [x] `test_physics.py`: Cat keeps falling without landing when surfaces list is empty
+    - [x] `test_physics.py`: `PhysicsResult.edge_hit` still works for Walk state at screen edges
 
-- [ ] Task: Implement gravity in Physics
-    - [ ] `physics.py`: Add `velocity_y: float` field initialized to 0.0
-    - [ ] `physics.py`: In `update()`, add Fall branch BEFORE the `if state is not PetState.Walk` early return:
-        - `velocity_y += GRAVITY * dt`
-        - `velocity_y = min(velocity_y, TERMINAL_VELOCITY)`
-        - `y += velocity_y * dt`
-    - [ ] `physics.py`: In non-Fall states, keep `velocity_y = 0.0`
+- [x] Task: Implement gravity in Physics [b613110]
+    - [x] `physics.py`: Add `velocity_y: float` field initialized to 0.0
+    - [x] `physics.py`: In `update()`, add Fall branch with gravity acceleration
+    - [x] `physics.py`: In non-Fall states, keep `velocity_y = 0.0`
 
-- [ ] Task: Implement landing detection in Physics
-    - [ ] `physics.py`: In Fall branch, iterate surfaces with `surface_type in ("window_top", "screen_bottom")`
-    - [ ] `physics.py`: Check `pet_bottom >= surface_top` AND horizontal overlap (`pet_center_x` within surface horizontal bounds)
-    - [ ] `physics.py`: On landing: snap `y = surface_top - SPRITE_CELL_HEIGHT`, zero `velocity_y`, set `result.landed = True`
-    - [ ] `physics.py`: Always include screen_bottom as final fallback
+- [x] Task: Implement landing detection in Physics [b613110]
+    - [x] `physics.py`: In Fall branch, iterate surfaces with surface_type in ("window_top", "screen_bottom")
+    - [x] `physics.py`: Check pet_bottom >= surface_top AND horizontal overlap
+    - [x] `physics.py`: On landing: snap y, zero velocity_y, set result.landed = True
+    - [x] `physics.py`: Hard clamp fallback at _FALLBACK_GROUND_Y
 
-- [ ] Task: Implement surface-loss detection in Physics (Walk state)
-    - [ ] `physics.py`: After Walk horizontal movement, check if any surface supports the cat's current position
-    - [ ] `physics.py`: Check `pet_bottom` is at or near `surface_top` AND horizontal overlap for each surface
-    - [ ] `physics.py`: If no surface supports the cat, set `result.surface_lost = True`
+- [x] Task: Implement surface-loss detection in Physics (Walk state) [b613110]
+    - [x] `physics.py`: After Walk horizontal movement, check if any surface supports the cat
+    - [x] `physics.py`: Check pet_bottom near surface_top AND horizontal overlap
+    - [x] `physics.py`: If no surface supports, set result.surface_lost = True
 
-- [ ] Task: Fix screen_bottom surface Y coordinate in environment.py
-    - [ ] `environment.py`: Change screen_bottom surface rect Y from `s.bottom() - SCREEN_BOTTOM_MARGIN_PX - SPRITE_CELL_HEIGHT` to `s.bottom() - SCREEN_BOTTOM_MARGIN_PX` (actual ground line)
-    - [ ] `test_environment.py`: Update `test_screen_bottom_surface` expected Y to match new formula
+- [x] Task: Fix screen_bottom surface Y coordinate in environment.py [b613110]
+    - [x] `environment.py`: Changed to actual ground line (without SPRITE_CELL_HEIGHT)
+    - [x] `test_environment.py`: Updated expected Y to match new formula
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: Canvas — Wire Fall into Animation Loop
 
