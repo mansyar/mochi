@@ -3,34 +3,34 @@
 ## Phase 1: Sprite Sheet Loading
 
 ### Task 1.1: Write tests for SpriteSheet loader (Red Phase)
-- [ ] Create `tests/test_sprites.py`
-- [ ] Test: `SpriteSheet` class exists and is instantiable
-- [ ] Test: `load("idle")` loads IDLE.png and returns `list[QPixmap]` with 10 frames (640÷64)
-- [ ] Test: each frame pixmap has size 64×64
-- [ ] Test: loading a non-existent file logs a warning and returns empty list
-- [ ] Test: `get_frames("idle")` returns the cached frame list
-- [ ] Test: `get_frames("nonexistent")` returns empty list (consistent with `load()`)
-- [ ] Test: BOWL.png (16×16) is silently skipped by the loader
-- [ ] Run tests and confirm they fail (Red Phase)
+- [x] Create `tests/test_sprites.py`
+- [x] Test: `SpriteSheet` class exists and is instantiable
+- [x] Test: `load("idle")` loads IDLE.png and returns `list[QPixmap]` with 10 frames (640÷64)
+- [x] Test: each frame pixmap has size 64×64
+- [x] Test: loading a non-existent file logs a warning and returns empty list
+- [x] Test: `get_frames("idle")` returns the cached frame list
+- [x] Test: `get_frames("nonexistent")` returns empty list (consistent with `load()`)
+- [x] Test: BOWL.png (16×16) is silently skipped by the loader
+- [x] Run tests and confirm they fail (Red Phase)
 
 ### Task 1.2: Implement SpriteSheet class (Green Phase)
-- [ ] Create `src/mochi/ui/sprites.py`
-- [ ] Implement `asset_path(relative: str) -> Path` helper supporting dev, PyInstaller, and Nuitka modes
-- [ ] Implement `SpriteSheet.__init__(asset_dir: str)` — store reference to asset directory
-- [ ] Implement `load(animation_key: str) -> list[QPixmap]`:
-    - [ ] Map key to filename: lowercase key → case-insensitive search for matching `.png` (e.g., `"idle"` → `IDLE.png`, `"attack 1"` → `ATTACK 1.png`)
-    - [ ] Load PNG via `QPixmap(str(path))`
-    - [ ] Validate PNG dimensions are multiples of `SPRITE_CELL_WIDTH`/`SPRITE_CELL_HEIGHT`; skip non-conforming files (e.g., BOWL.png)
-    - [ ] Slice PNG into individual 64×64 frame pixmaps using `QPixmap.copy()`
-    - [ ] Cache result internally, return `list[QPixmap]`
-    - [ ] If PNG not found or fails to load: log warning, cache and return empty list
-- [ ] Implement `get_frames(animation_key: str) -> list[QPixmap]` — return cached frame list (empty list if not loaded)
-- [ ] Run tests and confirm they pass (Green Phase)
+- [x] Create `src/mochi/ui/sprites.py`
+- [x] Implement `asset_path(relative: str) -> Path` helper supporting dev, PyInstaller, and Nuitka modes
+- [x] Implement `SpriteSheet.__init__(asset_dir: str)` — store reference to asset directory
+- [x] Implement `load(animation_key: str) -> list[QPixmap]`:
+    - [x] Map key to filename: lowercase key → case-insensitive search for matching `.png` (e.g., `"idle"` → `IDLE.png`, `"attack 1"` → `ATTACK 1.png`)
+    - [x] Load PNG via `QPixmap(str(path))`
+    - [x] Validate PNG dimensions are multiples of `SPRITE_CELL_WIDTH`/`SPRITE_CELL_HEIGHT`; skip non-conforming files (e.g., BOWL.png)
+    - [x] Slice PNG into individual 64×64 frame pixmaps using `QPixmap.copy()`
+    - [x] Cache result internally, return `list[QPixmap]`
+    - [x] If PNG not found or fails to load: log warning, cache and return empty list
+- [x] Implement `get_frames(animation_key: str) -> list[QPixmap]` — return cached frame list (empty list if not loaded)
+- [x] Run tests and confirm they pass (Green Phase)
 
 ### Task 1.3: Quality gate — lint, format, type-check sprites module
-- [ ] `uv run ruff check src/mochi/ui/sprites.py` — zero errors
-- [ ] `uv run mypy src/mochi/ui/sprites.py` — zero errors
-- [ ] `uv run pytest tests/test_sprites.py` — all tests pass
+- [x] `uv run ruff check src/mochi/ui/sprites.py` — zero errors
+- [x] `uv run mypy src/mochi/ui/sprites.py` — zero errors
+- [x] `uv run pytest tests/test_sprites.py` — all tests pass`[f58918c]`
 
 ## Phase 2: Idle Sprite Rendering & Animation
 
