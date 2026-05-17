@@ -23,8 +23,8 @@ class TestCanvasAnimationTimer:
         assert hasattr(canvas, "_animation_timer")
         assert isinstance(canvas._animation_timer, QTimer)
 
-    def test_animation_timer_interval_is_100ms(self, qtbot: object) -> None:
-        """Animation timer interval should equal ANIMATION_TICK_MS (100ms)."""
+    def test_animation_timer_interval_from_config(self, qtbot: object) -> None:
+        """Animation timer interval should equal ANIMATION_TICK_MS from config."""
         from mochi.core.canvas import Canvas
 
         canvas = Canvas()
