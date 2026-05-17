@@ -26,23 +26,23 @@
 
 > **Goal:** Create the `Physics` class with horizontal movement and screen boundary clamping, fully tested.
 
-- [ ] Task 2.1: Write Physics tests (test_physics.py)
-    - [ ] Write test: Walk state applies horizontal displacement at WALK_SPEED * dt
-    - [ ] Write test: Idle state results in zero movement
-    - [ ] Write test: Screen left edge signals edge-hit (does NOT reverse direction itself)
-    - [ ] Write test: Screen right edge signals edge-hit (does NOT reverse direction itself)
-    - [ ] Write test: Half-sprite overshoot allowed before edge-hit signal
-    - [ ] Write test: Cat position never exceeds bounds + overshoot
-    - [ ] Write test: No edge-hit signal when cat is in valid bounds
-    - [ ] Run tests: confirm they fail as expected (Red phase)
-- [ ] Task 2.2: Implement Physics class (src/mochi/core/physics.py)
-    - [ ] Create `Physics` class with `x`, `y`, `direction` (+1/-1) attributes
-    - [ ] Implement `update(dt: float, state: PetState, screen_width: int, sprite_width: int, surfaces: Any = None) -> bool`
-    - [ ] Apply `WALK_SPEED * dt * direction` to `x` when in Walk state
-    - [ ] Implement screen boundary detection with configurable overshoot (half sprite width)
-    - [ ] **Return bool**: `True` if edge was hit (canvas handles pause/direction reversal), `False` otherwise. Physics does NOT reverse direction — that's the FSM's job.
-    - [ ] API includes `surfaces=None` parameter for forward-compatibility with Phase 2 window awareness
-    - [ ] Run tests: confirm all pass (Green phase)
+- [x] Task 2.1: Write Physics tests (test_physics.py) `fea03e9`
+    - [x] Write test: Walk state applies horizontal displacement at WALK_SPEED * dt
+    - [x] Write test: Idle state results in zero movement
+    - [x] Write test: Screen left edge signals edge-hit (does NOT reverse direction itself)
+    - [x] Write test: Screen right edge signals edge-hit (does NOT reverse direction itself)
+    - [x] Write test: Half-sprite overshoot allowed before edge-hit signal
+    - [x] Write test: Cat position never exceeds bounds + overshoot
+    - [x] Write test: No edge-hit signal when cat is in valid bounds
+    - [x] Run tests: confirm they fail as expected (Red phase)
+- [x] Task 2.2: Implement Physics class (src/mochi/core/physics.py) `fea03e9`
+    - [x] Create `Physics` class with `x`, `y`, `direction` (+1/-1) attributes
+    - [x] Implement `update(dt: float, state: PetState, screen_width: int, sprite_width: int, surfaces: Any = None) -> bool`
+    - [x] Apply `WALK_SPEED * dt * direction` to `x` when in Walk state
+    - [x] Implement screen boundary detection with configurable overshoot (half sprite width)
+    - [x] **Return bool**: `True` if edge was hit (canvas handles pause/direction reversal), `False` otherwise. Physics does NOT reverse direction — that's the FSM's job.
+    - [x] API includes `surfaces=None` parameter for forward-compatibility with Phase 2 window awareness
+    - [x] Run tests: confirm all pass (Green phase)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Physics Engine' (Protocol in workflow.md)
 
 ## Phase 3: Canvas Integration & Walk Animation
