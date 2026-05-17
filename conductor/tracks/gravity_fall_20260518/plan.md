@@ -2,24 +2,30 @@
 
 ## Phase 1: FSM — Add Fall State
 
-**Goal:** Add the `Fall` behavior state to the FSM with correct transitions.
+**Goal:** Add the `Fall` behavior state to the FSM with correct transitions and defensive timer handling.
 
 - [ ] Task: Write FSM tests for Fall state
     - [ ] `test_fsm.py`: `PetState.Fall` exists and is not None
     - [ ] `test_fsm.py`: Walk→Fall transition on explicit `transition_to(PetState.Fall)`
     - [ ] `test_fsm.py`: Fall→Idle transition on explicit `transition_to(PetState.Idle)`
-    - [ ] `test_fsm.py`: Fall transitions do NOT use random timers (verify elapsed stays 0 after repeated ticks without external transition)
+    - [ ] `test_fsm.py`: Fall state is immune to timer-based auto-transition — tick with dt=100s and assert state is still Fall
+    - [ ] `test_fsm.py`: `_on_timer_expired()` does not raise when state is Fall (defensive no-op)
 
 - [ ] Task: Add PetState.Fall to FSM
     - [ ] `fsm.py`: Add `Fall` property to `PetState` class and create singleton
     - [ ] `fsm.py`: Add `PetState.Fall` to `_STATE_NAMES` dict
-    - [ ] `fsm.py`: Add `_set_timer_for_state` handling for Fall (no-op — Fall transitions are physics-driven, not timer-driven)
+    - [ ] `fsm.py`: In `_set_timer_for_state`, set Fall's timer to `float('inf')` (physics-driven, never auto-transitions)
+    - [ ] `fsm.py`: Add defensive Fall case to `_on_timer_expired()` — log a warning, no state change
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
-## Phase 2: Physics — Vertical Movement & Landing Detection
+## Phase 2: Physics — Gravity, Landing, and Surface-Loss Detection
 
-**Goal:** Implement gravity acceleration, terminal velocity capping, and ground/landing detection in the Physics engine.
+**Goal:** Implement gravity acceleration, terminal velocity capping, landing detection, and surface-loss detection in the Physics engine. Physics.update() return type changes from `bool` to `PhysicsResult`.
+
+- [ ] Task: Write PhysicsResult dataclass
+    - [ ] `physics.py`: Define `PhysicsResult` dataclass with `edge_hit: bool = False`, `surface_lost: bool = False`, `landed: bool = False`
+    - [ ] Re-export `PhysicsResult` from `mochi.core.__init__`
 
 - [ ] Task: Write Physics tests for gravity and landing
     - [ ] `test_physics.py`: Physics class initializes with `velocity_y == 0.0`
@@ -33,61 +39,77 @@
     - [ ] `test_physics.py`: Landing only triggers when horizontal overlap exists
     - [ ] `test_physics.py`: Cat lands on first (topmost/highest Z) surface when multiple surfaces at same Y exist
     - [ ] `test_physics.py`: No landing if no surface below (cat keeps falling)
-    - [ ] `test_physics.py`: `update()` returns a landing indicator (boolean or enum)
-    - [ ] `test_physics.py`: `update()` returns surface-loss indicator when Walk state has no supporting surface
+    - [ ] `test_physics.py`: `update()` returns `PhysicsResult` instance (update existing `test_update_returns_bool`)
+    - [ ] `test_physics.py`: `PhysicsResult.surface_lost` is True when Walk state has no supporting surface
+    - [ ] `test_physics.py`: `PhysicsResult.surface_lost` is False when Walk state is supported
+    - [ ] `test_physics.py`: `PhysicsResult.landed` is True when Fall state lands on a surface
     - [ ] `test_physics.py`: Fallback to screen_bottom when surfaces list is empty
+    - [ ] `test_physics.py`: `PhysicsResult.edge_hit` still works for Walk state at screen edges
 
-- [ ] Task: Implement gravity in Physics.update()
+- [ ] Task: Implement gravity in Physics
     - [ ] `physics.py`: Add `velocity_y: float` field initialized to 0.0
-    - [ ] `physics.py`: In `update()`, when state is Fall, apply gravity:
+    - [ ] `physics.py`: In `update()`, add Fall branch BEFORE the `if state is not PetState.Walk` early return:
         - `velocity_y += GRAVITY * dt`
         - `velocity_y = min(velocity_y, TERMINAL_VELOCITY)`
         - `y += velocity_y * dt`
     - [ ] `physics.py`: In non-Fall states, keep `velocity_y = 0.0`
 
-- [ ] Task: Implement landing detection in Physics.update()
-    - [ ] `physics.py`: `update()` accepts `list[Surface]` parameter (already exists as `surfaces: Any = None`)
-    - [ ] `physics.py`: Iterate surfaces with `surface_type in ("window_top", "screen_bottom")`
+- [ ] Task: Implement landing detection in Physics
+    - [ ] `physics.py`: In Fall branch, iterate surfaces with `surface_type in ("window_top", "screen_bottom")`
     - [ ] `physics.py`: Check `pet_bottom >= surface_top` AND horizontal overlap (`pet_center_x` within surface horizontal bounds)
-    - [ ] `physics.py`: On landing: snap `y = surface_top - SPRITE_CELL_HEIGHT`, zero `velocity_y`
-    - [ ] `physics.py`: Return landing indicator from `update()`
+    - [ ] `physics.py`: On landing: snap `y = surface_top - SPRITE_CELL_HEIGHT`, zero `velocity_y`, set `result.landed = True`
+    - [ ] `physics.py`: Always include screen_bottom as final fallback
 
-- [ ] Task: Implement surface-loss detection in Physics.update()
-    - [ ] `physics.py`: When state is Walk, check if any surface supports the cat's current position
-    - [ ] `physics.py`: Return surface-loss-indicator when no supporting surface found
-    - [ ] `physics.py`: Surface-loss check happens BEFORE movement (if currently supported, just check after movement)
+- [ ] Task: Implement surface-loss detection in Physics (Walk state)
+    - [ ] `physics.py`: After Walk horizontal movement, check if any surface supports the cat's current position
+    - [ ] `physics.py`: Check `pet_bottom` is at or near `surface_top` AND horizontal overlap for each surface
+    - [ ] `physics.py`: If no surface supports the cat, set `result.surface_lost = True`
+
+- [ ] Task: Fix screen_bottom surface Y coordinate in environment.py
+    - [ ] `environment.py`: Change screen_bottom surface rect Y from `s.bottom() - SCREEN_BOTTOM_MARGIN_PX - SPRITE_CELL_HEIGHT` to `s.bottom() - SCREEN_BOTTOM_MARGIN_PX` (actual ground line)
+    - [ ] `test_environment.py`: Update `test_screen_bottom_surface` expected Y to match new formula
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: Canvas — Wire Fall into Animation Loop
 
-**Goal:** Integrate Fall state, gravity physics, FALL sprite, and landing into the Canvas animation loop.
+**Goal:** Integrate Fall state, gravity physics, fall sprite (from JUMP.png middle frame), and landing into the Canvas animation loop with correct tick ordering.
 
 - [ ] Task: Write Canvas integration tests for Fall
     - [ ] `test_canvas.py`: `_advance_frame` transitions to Fall when surface is lost (mock surfaces)
     - [ ] `test_canvas.py`: `_advance_frame` transitions to Idle when landing detected
     - [ ] `test_canvas.py`: Fall sprite key is used when state is Fall
     - [ ] `test_canvas.py`: Animation tick interval is correct for Fall state
-    - [ ] `test_canvas.py`: FALL.png sprite loaded in Canvas init
+    - [ ] `test_canvas.py`: Middle frame of JUMP.png used as fall sprite in Canvas init
     - [ ] `test_canvas.py`: Physics receives surfaces list in update() call
+    - [ ] `test_canvas.py`: `_advance_frame` does NOT reorder — FSM tick runs AFTER physics update
 
-- [ ] Task: Load FALL.png sprite in Canvas
-    - [ ] `canvas.py`: Add `"fall": self._spritesheet.load("fall")` to `_animations` dict
+- [ ] Task: Load fall sprite from JUMP.png middle frame
+    - [ ] `canvas.py`: In `__init__`, add `"fall": [self._spritesheet.load("jump")[1]]` to `_animations` (frame index 1 of 3)
+    - [ ] Guard against IndexError if jump frames are fewer than 2: fallback to empty list with warning
 
 - [ ] Task: Add Fall sprite key and tick interval mappings
     - [ ] `canvas.py`: Add `PetState.Fall: "fall"` to `_SPRITE_KEYS`
-    - [ ] `canvas.py`: Add `PetState.Fall: 100` to `_TICK_INTERVALS` (10 FPS during fall)
+    - [ ] `canvas.py`: Add `PetState.Fall: 100` to `_TICK_INTERVALS` (10 FPS — keeps landing detection responsive)
 
 - [ ] Task: Pass surfaces list to Physics.update()
     - [ ] `canvas.py`: In `_advance_frame()`, pass `self._surfaces` to `self._physics.update(..., surfaces=self._surfaces)`
 
-- [ ] Task: Handle surface-loss signal from physics
-    - [ ] `canvas.py`: After `physics.update()`, check surface-loss indicator
-    - [ ] `canvas.py`: If surface lost and current state is Walk, `fsm.transition_to(PetState.Fall)`
+- [ ] Task: Reorder _advance_frame to prevent race condition
+    - [ ] `canvas.py`: Change _advance_frame order to:
+        1. Compute dt
+        2. Sync physics direction from FSM
+        3. Call `physics.update(surfaces=...)` → get `PhysicsResult`
+        4. If Walk and `result.surface_lost` → `fsm.transition_to(PetState.Fall)`
+        5. If Fall and `result.landed` → `fsm.transition_to(PetState.Idle)`
+        6. Call `fsm.tick(dt)` — safe: Fall has inf timer
+        7. Handle `result.edge_hit` → `fsm.transition_to(PetState.EdgePause)`
+        8. Determine sprite key, advance frame, update timer interval, repaint
+    - [ ] Update the existing `edge_hit = physics.update(...)` unpack to use `PhysicsResult`
 
-- [ ] Task: Handle landing signal from physics
-    - [ ] `canvas.py`: After `physics.update()`, check landing indicator
-    - [ ] `canvas.py`: If landed and current state is Fall, `fsm.transition_to(PetState.Idle)`
+- [ ] Task: Handle surface-loss and landing signals in Canvas
+    - [ ] `canvas.py`: After `physics.update()`, check `result.surface_lost` and transition if Walk
+    - [ ] `canvas.py`: After `physics.update()`, check `result.landed` and transition if Fall
 
 - [ ] Task: Run full test suite and verify
     - [ ] Run `uv run pytest` — all tests pass
