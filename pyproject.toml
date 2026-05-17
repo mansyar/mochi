@@ -49,7 +49,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 qt_api = "pyside6"
-addopts = "--cov=src/mochi --cov-report=term-missing --cov-report=html --cov-omit=__main__.py"
+addopts = "--cov=src/mochi --cov-report=term-missing --cov-report=html"
 
 [tool.coverage.run]
 source = ["src/mochi"]

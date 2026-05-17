@@ -23,13 +23,13 @@
 - [x] Create `src/mochi/__main__.py` as a minimal `python -m mochi` entry point (stub that imports `main` — will be completed in Task 0.10)
 - [x] Verify: `uv run python -c "import mochi"` succeeds with no errors
 
-### Task 0.3: Write tests for config.py
-- [ ] Write `tests/test_config.py`:
-    - [ ] Test that all physics constants are positive floats
-    - [ ] Test that all FSM timer tuples are (min, max) with min < max
-    - [ ] Test that all metric constants are within valid ranges
-    - [ ] Test that animation/render constants are positive integers
-- [ ] Run tests and confirm they fail (no implementation yet) — **Red Phase**
+### Task 0.3: Write tests for config.py `4b76d86`
+- [x] Write `tests/test_config.py`:
+    - [x] Test that all physics constants are positive floats
+    - [x] Test that all FSM timer tuples are (min, max) with min < max
+    - [x] Test that all metric constants are within valid ranges
+    - [x] Test that animation/render constants are positive integers
+- [x] Run tests and confirm they fail (no implementation yet) — **Red Phase**
 
 ### Task 0.4: Implement config.py
 - [ ] Create `src/mochi/config.py` with all physics constants (GRAVITY, TERMINAL_VELOCITY, WALK_SPEED, CLIMB_SPEED, WALL_SLIDE_SPEED)
