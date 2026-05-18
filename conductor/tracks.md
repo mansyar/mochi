@@ -26,3 +26,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - ~~[x] **Track: Track 2.1 — Window Polling & Surface Detection**~~
   ~~*Link: [./archive/window_polling_20260517/](./archive/window_polling_20260517/)*~~
+
+---
+
+- ~~[x] **Track: Track 2.2 — Gravity, Falling & Ground Snapping**~~
+  ~~*Link: [./archive/gravity_fall_20260518/](./archive/gravity_fall_20260518/)*~~

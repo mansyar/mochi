@@ -3,8 +3,8 @@
 ## Desktop Cat Pet — "Mochi"
 
 **Version:** 1.0
-**Last Updated:** 2026-05-17
-**Status:** Phase 2, Track 2.1 Complete — Active Development
+**Last Updated:** 2026-05-18
+**Status:** Phase 2 Complete — Ready for Phase 3
 
 ---
 
@@ -129,8 +129,8 @@ mochi/
 │       ├── core/
 │       │   ├── __init__.py
 │       │   ├── canvas.py          # Main transparent overlay window + sprite rendering ✅
-│       │   ├── fsm.py             # FSM engine: Idle, Walk, EdgePause states ✅
-│       │   ├── physics.py         # Horizontal movement, screen-boundary detection ✅
+│       │   ├── fsm.py             # FSM engine: Idle, Walk, EdgePause, Fall states ✅
+│       │   ├── physics.py         # Horizontal movement, gravity, landing detection, surface-loss detection, PhysicsResult ✅
 │   │   ├── environment.py     # PyWinCtl polling thread, Surface dataclass, surface list builder ✅
 │       │   └── input_bridge.py    # (planned) Platform-native global hotkey bridge
 │       ├── ui/
@@ -155,10 +155,12 @@ mochi/
 │   ├── test_logger.py            # 6 tests — logging setup
 │   ├── test_platform.py          # 13 tests — platform detection, click-through
 │   ├── test_main.py              # 6 tests — QApplication bootstrap, Canvas wiring
-│   ├── test_canvas.py            # 9 tests — Canvas widget properties + paintEvent + poller integration ✅
+│   ├── test_canvas.py            # 18 tests — Canvas widget properties, paintEvent, poller, Fall integration ✅
 │   ├── test_environment.py       # 31 tests — Surface dataclass, window filtering, polling loop, error resilience ✅
 │   ├── test_sprites.py           # 11 tests — SpriteSheet loading, slicing, centering ✅
-│   └── test_animation.py         # 10 tests — QTimer animation, frame advancement ✅
+│   ├── test_fsm.py               # 20 tests — PetState enum, FSM class, timer transitions, Fall state ✅
+│   ├── test_physics.py           # 39 tests — Horizontal movement, gravity, landing, surface-loss, PhysicsResult ✅
+│   └── test_animation.py         # 11 tests — QTimer animation, frame advancement, adaptive tick rate ✅
 ├── pyproject.toml
 └── README.md
 ```
@@ -416,25 +418,30 @@ The rendering container is a borderless, always-on-top, transparent Qt window sp
 | **Geometry** | Full primary screen dimensions |
 | **Click-Through** | Enabled by default (see §5.2) |
 
-The canvas runs a `QTimer` with an **adaptive tick rate** based on the current FSM state (Track 1.3 implements Walk and Idle; other states deferred to subsequent tracks):
+The canvas runs a `QTimer` with an **adaptive tick rate** based on the current FSM state:
 
 | State | Tick Interval | Rationale |
 |---|---|---|
 | Walk | 100ms (10 FPS) | Smooth movement animation |
 | Idle (Loaf) | 250ms (4 FPS) | Subtle breathing animation, low CPU |
 | EdgePause | 250ms (4 FPS) | Minimal CPU during brief pause; uses walk sprite |
+| Fall | 100ms (10 FPS) | Responsive landing detection during descent |
 | *(planned)* Sleep | 500ms (2 FPS) | Minimal breathing animation, lowest CPU |
+
+**Critical ordering:** Physics runs **before** the FSM tick to prevent Walk→Idle timer transitions from masking surface-loss detection. The Fall state has `float('inf')` timer so it never auto-transitions — only physics can end a fall.
 
 Each tick:
 1. Computes `dt = time.monotonic() - last_tick_time` for frame-rate-independent physics.
-2. Ticks the FSM (`fsm.tick(dt)`) — evaluates timer-based state transitions.
-3. Syncs physics direction from FSM (`physics.direction = fsm.direction`).
-4. Ticks the physics engine (`physics.update(dt, state, ...)`) — applies horizontal movement and detects screen-edge hits.
-5. If edge-hit detected: transitions FSM to EdgePause state (0.5–1s timer, then reverses direction).
-6. Determines sprite key from current state (`idle` or `walk`), swaps animation set if changed, resets frame index.
-7. Advances the animation frame index.
-8. Adapts the timer interval to the current state (100ms Walk, 250ms Idle/EdgePause).
-9. Calls `update()` to trigger `paintEvent()`.
+2. Syncs physics direction from FSM (`physics.direction = fsm.direction`).
+3. Ticks the physics engine (`physics.update(dt, state, ..., surfaces=self._surfaces)`) — applies horizontal movement, gravity, surface-loss detection, and landing detection. Returns `PhysicsResult` with `edge_hit`, `surface_lost` and `landed` booleans.
+4. If `result.surface_lost` and current state is Walk: transitions FSM to Fall.
+5. If `result.landed` and current state is Fall: transitions FSM to Idle (snaps position, zeroes velocity).
+6. Ticks the FSM (`fsm.tick(dt)`) — evaluates timer-based state transitions (safe: Fall has infinite timer).
+7. If `result.edge_hit` and current state is Walk: transitions FSM to EdgePause.
+8. Determines sprite key from current state (`idle`, `walk`, or `fall`), swaps animation set if changed, resets frame index.
+9. Advances the animation frame index.
+10. Adapts the timer interval to the current state.
+11. Calls `update()` to trigger `paintEvent()`.
 
 The timer interval is updated whenever the FSM transitions to a new state.
 
@@ -515,27 +522,41 @@ idle_frames: list[QPixmap] = sheet.load("idle")  # 8 frames
 
 **Direction-aware sprite rendering:** The `paintEvent()` renders the current sprite frame at `(physics.x, physics.y)`. When the cat is facing right (`direction == 1`), all sprites are flipped horizontally via `QPainter.scale(-1, 1)` since the sprite sheets face left by default. This provides a single sprite sheet per animation without needing separate left/right assets.
 
-### 5.4 Physics & Collision (`physics.py`)
+### 5.4 Physics & Collision (`physics.py`) ✅
 
-The physics engine operates in **logical pixel coordinates** and runs every 100ms tick.
+The physics engine operates in **logical pixel coordinates** and is frame-rate-independent (all movement scaled by `dt`).
 
-#### Gravity Model
+#### Gravity Model (Implemented in Track 2.2)
 
 ```python
 # During Fall state, each tick:
-dt = 0.1  # 100ms in seconds
-velocity_y += GRAVITY * dt          # Accelerate
-velocity_y = min(velocity_y, TERMINAL_VELOCITY)  # Cap
-position_y += velocity_y * dt       # Move
+dt = time.monotonic() - last_tick  # Typically ~0.1s
+velocity_y += GRAVITY * dt          # Accelerate at 980 px/s²
+velocity_y = min(velocity_y, TERMINAL_VELOCITY)  # Cap at 600 px/s
+position_y += velocity_y * dt       # Move downward
 ```
+
+#### PhysicsResult (Implemented in Track 2.2)
+
+```python
+@dataclass
+class PhysicsResult:
+    edge_hit: bool = False       # Walk: reached screen edge
+    surface_lost: bool = False   # Walk: no supporting surface below
+    landed: bool = False         # Fall: landed on a surface
+```
+
+The `update()` method returns this struct instead of a bare `bool`. The Canvas reads these signals to drive FSM transitions.
 
 #### Collision Detection
 
-Runs after every position update:
+**Surface-loss detection (Walk state):** After horizontal movement, checks if any `window_top` or `screen_bottom` surface supports the cat's current position. A surface supports the cat if `abs(pet_bottom - surface_top) <= 4px` (tolerance) and the cat's center X is within the surface's horizontal bounds (+/- 4px tolerance for QRect edge exclusivity).
 
-1. **Ground check:** If `pet_bottom >= surface_top` for any surface in the platform list, snap `pet_bottom = surface_top`, zero vertical velocity, transition to Idle.
-2. **Lateral check:** If `pet_right >= surface_left` or `pet_left <= surface_right` for any vertical surface, transition to Climb.
-3. **Screen bounds:** Clamp position within screen boundaries. Screen bottom = ground of last resort.
+**Landing detection (Fall state):** After gravity is applied, iterates surfaces in Z-order (first = topmost). For each `window_top`/`screen_bottom` surface: if the cat was above the surface at tick start and its bottom edge has reached or passed the surface top (`pet_bottom >= surface_top`), snap the cat's Y to `surface_top - ground_offset`, zero `velocity_y`, and return `landed=True`.
+
+**Ground offset:** The sprite cell is 80x64 but cat art is ~28px tall, auto-centered within the cell. `_compute_ground_offset()` scans idle/walk frames for the bottommost non-transparent pixel and computes the actual ground contact distance (typically ~46px vs the full 64px). This eliminates the transparent padding gap below the cat's feet when standing on surfaces.
+
+**Hard clamp:** If the cat falls below `_FALLBACK_GROUND_Y = 10000` (no surfaces available), velocity is zeroed and position clamped to prevent infinite fall.
 
 #### Surface Data Structure ✅
 
@@ -698,12 +719,12 @@ Run with `uv run pytest`. Coverage reported via `pytest-cov`.
 | `test_logger.py` | Logging setup creates correct handlers, respects debug flag, file/console output | ✅ 6 tests |
 | `test_platform.py` | OS detection, data directory resolution (Windows/macOS/Linux), Alt-key stub, click-through toggle with platform mocking | ✅ 13 tests |
 | `test_main.py` | QApplication bootstrap, org/app name, logging initialization, Canvas wiring | ✅ 6 tests |
-| `test_canvas.py` | Canvas is QWidget subclass, correct window flags, translucent background, geometry matches primary screen, paintEvent doesn't raise, EnvironmentPoller integration | ✅ 9 tests |
+| `test_canvas.py` | Canvas widget properties, Fall state integration (surface-loss→Fall, landing→Idle, sprite key, tick interval, jump frame usage, physics surfaces), poller | ✅ 18 tests |
 | `test_sprites.py` | SpriteSheet class, 8-frame idle loading at 80x64 per frame, centering tolerance, error handling for missing/invalid files, multi-word keys | ✅ 11 tests |
-| `test_animation.py` | QTimer creation and interval, frame index advancement and wrap-around, drawPixmap called in paintEvent, green rect removal | ✅ 10 tests |
-| `test_fsm.py` | PetState enum, FSM class, Idle→Walk and Walk→Idle timer transitions, EdgePause reversal, same-state no-op, DEBUG logging | ✅ 15 tests |
+| `test_animation.py` | QTimer creation and interval, frame index advancement and wrap-around, drawPixmap called in paintEvent, green rect removal, adaptive tick rate | ✅ 11 tests |
+| `test_fsm.py` | PetState enum, FSM class, all timer transitions, EdgePause reversal, Fall state (singleton, infinite timer, Walk→Fall, Fall→Idle, defensive no-op) | ✅ 20 tests |
 | `test_environment.py` | Surface dataclass fields/types/defaults, window filtering (minimized, empty title, Mochi), surface list builder (6 types), polling loop signal emission, error resilience with mocked pywinctl | ✅ 31 tests |
-| `test_physics.py` | Horizontal movement at WALK_SPEED, screen-boundary detection (left/right), half-sprite overshoot, direction-aware edge signalling, position clamping, API forward-compatibility | ✅ 21 tests |
+| `test_physics.py` | Horizontal movement, screen-boundary detection, gravity acceleration, terminal velocity capping, landing detection (snap, zero velocity, horizontal overlap, topmost priority), surface-loss detection, PhysicsResult API | ✅ 39 tests |
 | `test_pet_state.py` | (Planned) Metric decay calculation, JSON round-trip, corruption recovery, boundary clamping (0–100) | 📋 Planned |
 
 ### 8.2 Integration Tests (pytest-qt)
@@ -724,16 +745,16 @@ def test_window_flags_set(qtbot):
 - **Click-through (implemented):** `test_platform.py` — Windows enable/disable via win32 helper, macOS/Linux no-op paths.
 - **Sprite loading (implemented):** `test_sprites.py` — Sheet slicing produces correct frame count and dimensions, auto-centering verified within 2px tolerance, error paths for missing/invalid files.
 - **Animation timer (implemented):** `test_animation.py` — QTimer created at correct interval, frame index advances and wraps, paintEvent uses drawPixmap instead of fillRect, adaptive tick rate verified per FSM state transition.
-- **FSM (implemented):** `test_fsm.py` — 15 tests covering Idle→Walk/Walk→Idle timer transitions, EdgePause reversal, same-state no-op, and DEBUG-level logging.
-- **Physics (implemented):** `test_physics.py` — 21 tests covering horizontal movement, screen-boundary detection with half-sprite overshoot, direction-aware edge signalling, and forward-compatible API surface.
+- **FSM (implemented):** `test_fsm.py` — 20 tests covering all timer transitions, EdgePause reversal, Fall state (singleton, Walk→Fall/Fall→Idle transitions, infinite timer, defensive no-op).
+- **Physics (implemented):** `test_physics.py` — 39 tests covering horizontal movement, screen-boundary detection, gravity acceleration (GRAVITY × dt, terminal velocity cap), landing detection (snap Y, zero velocity, horizontal overlap, topmost priority, screen_bottom fallback, no landing above), surface-loss detection (no support, horizontal bounds), and PhysicsResult API.
 - **Hotkey bridge (planned):** Verify `InputBridge.register()` succeeds on each platform.
 - **Signal flow (implemented):** `EnvironmentPoller` → `platforms_updated` signal verified via mocked `pywinctl` in `test_environment.py`. Canvas `_on_platforms_updated` stores surface list in `test_canvas.py`.
 
 ### 8.3 Manual QA Checklist
 
 - [ ] Cat walks on top of VS Code, browser, file explorer windows
-- [ ] Moving a window out from under the cat causes a fall
-- [ ] Cat lands on the next window below, or on screen bottom
+- [ ] Moving a window out from under the cat causes a fall (implemented — requires window surfaces; cat falls when surface is lost)
+- [ ] Cat lands on the next window below, or on screen bottom (implemented — landing detected via surface intersection)
 - [ ] Climbing a screen edge transitions to walking at the top
 - [ ] Toolbox opens at cursor, items work, cooldowns enforce
 - [ ] Boss Key hides everything, second press restores

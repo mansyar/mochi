@@ -251,14 +251,13 @@ class TestSurfaceListBuilder:
 
     def test_screen_bottom_surface(self) -> None:
         """Screen bottom surface should always be present."""
-        from mochi import config
 
         geo = QRect(0, 0, 1920, 1080)
         poller = EnvironmentPoller(screen_geo=geo)
         surfaces = poller._build_surfaces([])
         bottoms = [s for s in surfaces if s.surface_type == "screen_bottom"]
         assert len(bottoms) == 1
-        expected_y = geo.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - config.SPRITE_CELL_HEIGHT
+        expected_y = geo.bottom()
         assert bottoms[0].rect == QRect(0, expected_y, 1920, 0)
 
     def test_screen_left_surface(self) -> None:

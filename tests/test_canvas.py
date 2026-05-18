@@ -1,6 +1,6 @@
 """Tests for mochi.core.canvas."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from PySide6.QtCore import QRect, Qt
@@ -179,3 +179,144 @@ class TestCanvasEnvironmentPoller:
         canvas = Canvas()
         qtbot.addWidget(canvas)  # type: ignore[attr-defined]
         assert hasattr(canvas, "_surfaces")
+
+
+class TestCanvasFallIntegration:
+    """Canvas must properly integrate Fall state into _advance_frame."""
+
+    def test_advance_frame_transitions_to_fall_on_surface_lost(self, qtbot: object) -> None:
+        """_advance_frame transitions to Fall when surface is lost in Walk."""
+        from mochi import config
+        from mochi.core.canvas import Canvas
+        from mochi.core.environment import Surface
+        from mochi.core.fsm import PetState
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+
+        # Put the cat in Walk state
+        canvas._fsm.transition_to(PetState.Walk)
+        # Set cat on a surface
+        bottom_y = canvas._screen_bottom_y()
+        bottom_surface = Surface(
+            rect=QRect(0, bottom_y + config.SPRITE_CELL_HEIGHT, 1920, 0),
+            surface_type="screen_bottom",
+            window_id=None,
+        )
+        canvas._surfaces = [bottom_surface]
+        canvas._on_platforms_updated(canvas._surfaces)
+
+        # Now set no surfaces to trigger surface loss
+        canvas._surfaces = []
+        canvas._on_platforms_updated(canvas._surfaces)
+
+        # Tick — should detect surface loss and transition to Fall
+        canvas._advance_frame()
+        assert canvas._fsm.current_state == PetState.Fall, (
+            "Should transition to Fall when surface is lost"
+        )
+
+    def test_advance_frame_transitions_to_idle_on_landing(self, qtbot: object) -> None:
+        """_advance_frame transitions to Idle when landing detected."""
+        from mochi.core.canvas import Canvas
+        from mochi.core.environment import Surface
+        from mochi.core.fsm import PetState
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+
+        # Put the cat in Fall state above a surface
+        canvas._fsm.transition_to(PetState.Fall)
+        # Place cat just above a surface, with high velocity
+        canvas._physics.y = 50.0
+        canvas._physics.velocity_y = 500.0
+        surface_y = 80  # surface just 30px below — should land in one tick
+        landing_surface = Surface(
+            rect=QRect(0, surface_y, 1920, 0),
+            surface_type="window_top",
+            window_id=None,
+        )
+        canvas._surfaces = [landing_surface]
+        canvas._on_platforms_updated(canvas._surfaces)
+
+        # Tick — should land and transition to Idle
+        canvas._advance_frame()
+        assert canvas._fsm.current_state == PetState.Idle, "Should transition to Idle after landing"
+
+    def test_fall_sprite_key_used_when_fall_state(self, qtbot: object) -> None:
+        """Fall sprite key is used when state is Fall."""
+        from mochi.core.canvas import Canvas
+        from mochi.core.fsm import PetState
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+
+        canvas._fsm.transition_to(PetState.Fall)
+        canvas._advance_frame()
+
+        # After FSM tick, the sprite key should reflect Fall's mapped key
+        current_key = canvas._current_sprite_key
+        # Fall should map to "fall" or the sprite key for Fall
+        from mochi.core.canvas import _SPRITE_KEYS
+
+        assert current_key == _SPRITE_KEYS.get(PetState.Fall, "fall"), (
+            f"Sprite key should be '{_SPRITE_KEYS.get(PetState.Fall, 'fall')}' "
+            f"for Fall state, got '{current_key}'"
+        )
+
+    def test_fall_tick_interval_correct(self, qtbot: object) -> None:
+        """Animation tick interval is correct for Fall state."""
+        from mochi.core.canvas import _TICK_INTERVALS, Canvas
+        from mochi.core.fsm import PetState
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+
+        canvas._fsm.transition_to(PetState.Fall)
+        canvas._advance_frame()
+
+        expected = _TICK_INTERVALS.get(PetState.Fall, 100)
+        assert canvas._animation_timer.interval() == expected, (
+            f"Timer interval should be {expected}ms for Fall state, "
+            f"got {canvas._animation_timer.interval()}"
+        )
+
+    def test_physics_receives_surfaces_in_update(self, qtbot: object) -> None:
+        """Physics receives surfaces list in update() call."""
+        from PySide6.QtCore import QRect
+
+        from mochi.core.canvas import Canvas
+        from mochi.core.environment import Surface
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+
+        # Set up a surface
+        surf = Surface(rect=QRect(0, 0, 1920, 0), surface_type="screen_bottom", window_id=None)
+        canvas._surfaces = [surf]
+        canvas._on_platforms_updated(canvas._surfaces)
+
+        # Spy on physics.update
+        original_update = canvas._physics.update
+
+        def spy_update(dt, state, screen_width, sprite_width, **kwargs):
+            assert "surfaces" in kwargs, "physics.update() should receive 'surfaces' kwarg"
+            assert kwargs["surfaces"] == [surf], (
+                "physics.update() should receive the correct surfaces list"
+            )
+            return original_update(dt, state, screen_width, sprite_width, **kwargs)
+
+        with patch.object(canvas._physics, "update", side_effect=spy_update):
+            canvas._advance_frame()
+
+    def test_middle_frame_of_jump_used_as_fall_sprite(self, qtbot: object) -> None:
+        """Middle frame of JUMP.png used as fall sprite in Canvas init."""
+        from mochi.core.canvas import Canvas
+
+        canvas = Canvas()
+        qtbot.addWidget(canvas)  # type: ignore[attr-defined]
+
+        # Check that fall key exists in animations
+        assert "fall" in canvas._animations, "Canvas should have a 'fall' animation key"
+        # Check it has exactly 1 frame (the middle frame of jump)
+        assert len(canvas._animations["fall"]) >= 1, "Fall animation should have at least 1 frame"

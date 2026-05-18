@@ -2,11 +2,12 @@
 
 from mochi.core.environment import Surface
 from mochi.core.fsm import FSM, PetState
-from mochi.core.physics import Physics
+from mochi.core.physics import Physics, PhysicsResult
 
 __all__ = [
     "FSM",
     "PetState",
     "Physics",
+    "PhysicsResult",
     "Surface",
 ]

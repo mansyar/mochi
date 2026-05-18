@@ -107,8 +107,6 @@ class EnvironmentPoller(QThread):
         list[Surface]
             All walkable/grabbable surfaces on the desktop.
         """
-        from mochi import config
-
         surfaces: list[Surface] = []
         s = self._screen_geo
 
@@ -149,7 +147,7 @@ class EnvironmentPoller(QThread):
             )
 
         # ── Screen edge surfaces ───────────────────────────────────────
-        bottom_y = s.bottom() - config.SCREEN_BOTTOM_MARGIN_PX - config.SPRITE_CELL_HEIGHT
+        bottom_y = s.bottom()
         surfaces.append(
             Surface(
                 rect=QRect(0, bottom_y, s.width(), 0),

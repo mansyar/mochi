@@ -2,7 +2,7 @@
 
 ## Desktop Cat Pet — "Mochi"
 
-**Last Updated:** 2026-05-17 (Phase 2, Track 2.1 completed)
+**Last Updated:** 2026-05-18 (Phase 2 complete)
 
 Each phase builds on the previous one. Each track within a phase is a **vertical slice** — it touches all layers needed (model, core, UI, tests) to deliver one testable, demoable behavior.
 
@@ -125,7 +125,7 @@ Each phase builds on the previous one. Each track within a phase is a **vertical
 
 > **Goal:** The cat interacts with real application windows — walks on them, falls off them, climbs edges.
 >
-> **Status:** Track 2.1 complete — background window polling infrastructure built. The cat does NOT yet walk on windows (ground snapping deferred to Track 2.2).
+> **Status:** Tracks 2.1 and 2.2 complete — background window polling infrastructure built, gravity/falling/ground snapping implemented. The cat does NOT yet climb walls (deferred to Track 2.3).
 
 ### Track 2.1 — Window Polling & Surface Detection ✅
 
@@ -164,26 +164,39 @@ Each phase builds on the previous one. Each track within a phase is a **vertical
 - [x] `uv run mypy src/mochi/` — zero type errors
 - [x] Review completed and archived (see `conductor/archive/window_polling_20260517/`)
 
-### Track 2.2 — Gravity, Falling & Ground Snapping
+### Track 2.2 — Gravity, Falling & Ground Snapping ✅
 
-**Modules:** `fsm.py`, `physics.py`, `environment.py`
+**Modules:** `fsm.py`, `physics.py`, `canvas.py`, `environment.py`
 
-| Task | Detail |
-|---|---|
-| Add Fall state to FSM | Walk→Fall transition when surface is lost |
-| Implement gravity | `velocity_y += GRAVITY * dt`, capped at `TERMINAL_VELOCITY` |
-| Ground/landing detection | When `pet_bottom >= surface_top` for any surface in `EnvironmentPoller`'s list, snap to surface, zero velocity, transition to Idle |
-| Fall animation | Switch to fall sprite during descent |
-| Screen bottom as last resort | If no window surface below, land on screen bottom |
+| Task | Status | Detail |
+|---|---|---|
+| Add Fall state to FSM | ✅ Complete | `PetState.Fall` with `float('inf')` timer (physics-driven, never auto-transitions). Walk→Fall and Fall→Idle transitions. Defensive no-op in `_on_timer_expired` |
+| Implement gravity | ✅ Complete | `velocity_y += GRAVITY * dt`, capped at `TERMINAL_VELOCITY` (600 px/s). Reset to 0 in non-Fall states |
+| Landing detection | ✅ Complete | After gravity movement, iterate `window_top`/`screen_bottom` surfaces in Z-order. If `pet_bottom >= surface_top` and horizontal overlap, snap `y = surface_top - ground_offset`, zero velocity, return `landed=True` |
+| Surface-loss detection | ✅ Complete | After Walk horizontal movement, check if any surface supports the cat (`abs(pet_bottom - surface_top) <= 4px` tolerance). If not, return `surface_lost=True` |
+| PhysicsResult | ✅ Complete | New `PhysicsResult` dataclass replaces bare `bool` return: `edge_hit`, `surface_lost`, `landed` booleans |
+| Fall animation | ✅ Complete | Fall sprite extracted from JUMP.png middle frame (index 1). Single-frame static sprite shown during descent |
+| Screen bottom fix | ✅ Complete | `screen_bottom` surface Y changed to actual `availableGeometry.bottom()`. Canvas spawn position uses computed `ground_offset` (46px vs 64px) to eliminate floating gap |
+| Horizontal edge tolerance | ✅ Complete | 4px tolerance on horizontal overlap checks to handle QRect exclusive right boundary. Cat no longer falsely falls at screen edges |
+| Tick loop reordering | ✅ Complete | `_advance_frame` reordered: physics → surface_loss→Fall → landed→Idle → FSM tick → edge_hit→EdgePause. Critical: physics before FSM prevents Walk→Idle masking surface-loss |
 
 **Tests:**
-- `test_physics.py`: Gravity accelerates correctly. Terminal velocity caps. Landing snaps position and zeroes velocity.
-- `test_fsm.py`: Walk→Fall on surface loss. Fall→Idle on landing.
+- `test_physics.py`: 24 new + 15 updated = 39 tests — gravity acceleration, terminal velocity cap, landing snap/zero/horizontal/topmost/screen_bottom, surface-loss detection, PhysicsResult API
+- `test_fsm.py`: 4 new Fall tests — singleton, Walk→Fall, Fall→Idle, infinite timer, defensive no-op
+- `test_canvas.py`: 6 new integration tests — surface-loss→Fall, landing→Idle, fall sprite key, tick interval, surfaces passed, jump frame loaded
 
-**Definition of Done:**
-- [ ] Closing or moving a window under the cat causes it to **fall with acceleration**
-- [ ] Cat lands on the next window below, or on screen bottom
-- [ ] Fall animation plays during descent
+**Results:**
+- [x] `PetState.Fall` exists with physics-driven transitions (no random timer)
+- [x] Cat accelerates at 980 px/s², capped at 600 px/s during fall
+- [x] Cat lands on the first (topmost) surface below it, or on screen bottom
+- [x] Landing snaps position and zeroes velocity
+- [x] Fall sprite (JUMP.png middle frame) displayed during descent
+- [x] Cat does NOT falsely fall off screen edges
+- [x] Cat's visible feet touch surfaces exactly (no transparent padding gap)
+- [x] `uv run pytest` — **182 passed, 1 skipped, 91% coverage**
+- [x] `uv run ruff check src/` — zero lint errors
+- [x] `uv run mypy src/mochi/` — zero type errors
+- [x] Review completed and archived (see `conductor/archive/gravity_fall_20260518/`)
 
 ### Track 2.3 — Climbing & Wall Slide
 
@@ -530,7 +543,7 @@ graph TD
 |---|---|---|
 | **Phase 0** | 1 | Runnable project skeleton |
 | **Phase 1** | 3 | Visible animated cat walking on screen bottom |
-| **Phase 2** | 4 | Cat interacts with real windows — walks, falls, climbs, sleeps (T2.1 complete, T2.2–T2.4 pending) |
+| **Phase 2** | 4 | Cat interacts with real windows — walks, falls, climbs, sleeps (T2.1–T2.2 complete, T2.3–T2.4 pending) |
 | **Phase 3** | 4 | User can interact — hotkeys, drag, tray, boss key |
 | **Phase 4** | 3 | Tamagotchi lifecycle — metrics, toolbox, behavioral effects |
 | **Phase 5** | 5 | Polish, edge cases, packaging for distribution |

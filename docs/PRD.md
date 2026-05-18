@@ -3,12 +3,14 @@
 ## Desktop Cat Pet — "Mochi"
 
 **Version:** 1.0
-**Last Updated:** 2026-05-17
-**Status:** Phase 2, Track 2.1 Complete — Active Development
+**Last Updated:** 2026-05-18
+**Status:** Phase 2 Complete — Ready for Phase 3
 
 > **Project Status:** Phase 0 (Project Foundation) is complete. **Tracks 1.1, 1.2, and 1.3** are complete — the transparent overlay renders the cat sprite with a looping idle breathing animation (8 frames at 250ms intervals, auto-centered frames). The cat autonomously walks left and right along the screen bottom using an FSM-driven Idle→Walk→EdgePause cycle, reversing direction at screen edges with a brief pause. The walk animation uses direction-aware sprite flipping via `QPainter.scale(-1, 1)` and an adaptive tick rate (100ms during Walk, 250ms during Idle). The green test rectangle has been removed.
 >
-> **Track 2.1 (Window Polling & Surface Detection)** is complete — a background `EnvironmentPoller` thread queries `pywinctl.getAllWindows()` every 300ms, filters out minimized/empty-title/Mochi windows, builds a `list[Surface]` (window tops, window sides, screen edges), and emits a `platforms_updated` signal to the main thread via Qt's cross-thread signal-slot mechanism. Canvas stores the surface list and logs update counts. Error handling gracefully degrades on permission errors. **153 tests passing with 91% coverage, zero lint/type errors.** The cat does NOT yet walk on window surfaces — ground snapping is deferred to Track 2.2. See `ROADMAP.md` for the full development plan.
+> **Track 2.1 (Window Polling & Surface Detection)** is complete — a background `EnvironmentPoller` thread queries `pywinctl.getAllWindows()` every 300ms, filters out minimized/empty-title/Mochi windows, builds a `list[Surface]` (window tops, window sides, screen edges), and emits a `platforms_updated` signal to the main thread. Canvas stores the surface list and logs update counts.
+>
+> **Track 2.2 (Gravity, Falling & Ground Snapping)** is complete — the Fall FSM state has been implemented with physics-driven transitions (infinite timer, never auto-transitions). The `Physics` engine now tracks `velocity_y` and applies gravity acceleration (980 px/s²) capped at terminal velocity (600 px/s). When a supporting surface is lost in Walk state, the cat transitions to Fall. Landing detection iterates `window_top` and `screen_bottom` surfaces in Z-order, snaps the cat's position to the surface top, zeros velocity, and transitions to Idle. The `PhysicsResult` dataclass replaces the previous `bool` return with `edge_hit`, `surface_lost`, and `landed` signals. The `_advance_frame()` loop was reordered to run physics before the FSM tick, preventing Walk→Idle timer transitions from masking surface-loss detection. The fall sprite is extracted from the middle frame of JUMP.png. The screen_bottom surface was repositioned to the exact `availableGeometry` bottom, and a `ground_offset` computed from sprite content bounds eliminates the 18px floating gap between the cat's visible feet and surfaces. The horizontal overlap check includes a 4px tolerance to handle QRect's exclusive right boundary at screen edges. **182 tests passing with 91% coverage, zero lint/type errors.** See `ROADMAP.md` for the full development plan.
 
 ---
 
@@ -303,7 +305,7 @@ When a fullscreen application is detected (game, video player, presentation, vid
 ## 8. MVP Definition of Done
 
 - [ ] Cat walks on top edges of visible application windows
-- [ ] Cat falls with gravity acceleration when supporting window is moved/closed/minimized
+- [x] Cat falls with gravity acceleration when supporting window is moved/closed/minimized
 - [ ] Cat climbs screen edges and window side borders
 - [ ] Cat transitions between all 7 FSM states without visual glitches or stuck states
 - [ ] Idle state has subtle breathing/tail micro-animation (not a static sprite)
