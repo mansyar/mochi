@@ -353,8 +353,8 @@ class TestPhysicsGravity:
 class TestPhysicsLanding:
     """Test landing detection when falling onto surfaces."""
 
-    def _make_surface(self, y: int, width: int = 1920, type: str = "window_top") -> Surface:
-        return Surface(rect=QRect(0, y, width, 0), surface_type=type, window_id=None)
+    def _make_surface(self, y: int, width: int = 1920, surface_type: str = "window_top") -> Surface:
+        return Surface(rect=QRect(0, y, width, 0), surface_type=surface_type, window_id=None)
 
     def test_land_on_surface_snaps_y(self) -> None:
         """Landing on a surface below snaps y to surface top - SPRITE_CELL_HEIGHT."""
@@ -394,7 +394,7 @@ class TestPhysicsLanding:
         p.y = 900.0
         p.velocity_y = 500.0
 
-        surfaces = [self._make_surface(y=1000, type="screen_bottom")]
+        surfaces = [self._make_surface(y=1000, surface_type="screen_bottom")]
         result = p.update(1.0, PetState.Fall, 1920, 80, surfaces=surfaces)
 
         assert result.landed, "Should land on screen_bottom"
@@ -498,8 +498,8 @@ class TestPhysicsLanding:
 class TestPhysicsSurfaceLoss:
     """Test surface-loss detection in Walk state."""
 
-    def _make_surface(self, y: int, width: int = 1920, type: str = "window_top") -> Surface:
-        return Surface(rect=QRect(0, y, width, 0), surface_type=type, window_id=None)
+    def _make_surface(self, y: int, width: int = 1920, surface_type: str = "window_top") -> Surface:
+        return Surface(rect=QRect(0, y, width, 0), surface_type=surface_type, window_id=None)
 
     def test_surface_lost_when_no_support(self) -> None:
         """surface_lost is True when Walk state has no supporting surface."""
